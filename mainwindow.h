@@ -1,0 +1,38 @@
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
+
+#include <QMainWindow>
+#include <QSerialPort>
+
+QT_BEGIN_NAMESPACE
+namespace Ui { class MainWindow; }
+QT_END_NAMESPACE
+
+class MainWindow : public QMainWindow
+{
+    Q_OBJECT
+
+public:
+    MainWindow(QWidget *parent = nullptr);
+    ~MainWindow();
+
+    // Estados del sistema (Igual que en el AVR)
+    enum State { Desconectado, Listo, Corriendo, Detenido, Error };
+
+private slots:
+    // Eventos de la Interfaz
+    void on_btnConectar_clicked();
+    void on_btnStart_clicked();
+    void on_btnStop_clicked();
+    void on_btnReset_clicked();
+    void readSerial(); // Recepción de datos
+
+private:
+    Ui::MainWindow *ui;
+    QSerialPort *serial;
+    State m_estadoActual;
+    void setEstado(State nuevoEstado);
+    void enviarComando(uint8_t cmd, QByteArray payload = QByteArray());
+    void procesarComandoMicro(uint8_t cmd);
+};
+#endif
