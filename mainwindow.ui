@@ -3,29 +3,366 @@
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
   <property name="geometry">
-   <rect><x>0</x><y>0</y><width>500</width><height>450</height></rect>
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>508</width>
+    <height>334</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Simulador HMI - Cinta Clasificadora</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">/* Diseño SCADA / Industrial Dark Mode */
+QWidget { background-color: #2b2b2b; color: #e0e0e0; font-family: &quot;Segoe UI&quot;, sans-serif; }
+
+/* Estilo para las Pestañas */
+QTabWidget::pane { border: 1px solid #444444; border-radius: 4px; }
+QTabBar::tab { background: #3a3a3a; color: #aaaaaa; padding: 8px 20px; border: 1px solid #444; border-bottom: none; border-top-left-radius: 6px; border-top-right-radius: 6px; margin-right: 2px; }
+QTabBar::tab:selected { background: #0275d8; color: white; font-weight: bold; }
+QTabBar::tab:hover:!selected { background: #4a4a4a; }
+
+/* Cajas de Agrupación */
+QGroupBox { border: 1px solid #444444; border-radius: 6px; margin-top: 15px; font-weight: bold; }
+QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0 5px; color: #5bc0de; }
+
+/* Botones Generales */
+QPushButton { border-radius: 4px; padding: 6px 12px; font-weight: bold; color: white; border: none; background-color: #555555;}
+QPushButton:hover { background-color: #777777; }
+QPushButton:pressed { background-color: #333333; }
+
+/* Botones Específicos */
+QPushButton#btnConectar { background-color: #0275d8; }
+QPushButton#btnConectar:hover { background-color: #33b5e5; }
+QPushButton#btnStart { background-color: #5cb85c; }
+QPushButton#btnStart:hover { background-color: #449d44; }
+QPushButton#btnStop { background-color: #d9534f; }
+QPushButton#btnStop:hover { background-color: #c9302c; }
+QPushButton#btnReset { background-color: #f0ad4e; }
+QPushButton#btnReset:hover { background-color: #ec971f; }
+
+/* Cajas de Texto y Entradas */
+QTextEdit, QLineEdit { background-color: #1e1e1e; color: #00ff00; border: 1px solid #444; border-radius: 4px; font-family: &quot;Consolas&quot;, monospace; font-size: 12px; }
+QLineEdit { color: #ffffff; font-size: 14px; font-weight: bold; padding-left: 5px;}
+
+QLabel#lblEstado { font-weight: bold; color: #f0ad4e; font-size: 13px; }
+QLabel { font-weight: bold; }
+   </string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="v">
+   <layout class="QVBoxLayout" name="verticalLayout_main">
     <item>
-     <widget class="QGroupBox" name="g1"><property name="title"><string>Conexión</string></property>
-      <layout class="QHBoxLayout">
-       <item><widget class="QPushButton" name="btnConectar"><property name="text"><string>Conectar COM3</string></property></widget></item>
-       <item><widget class="QLabel" name="lblEstado"><property name="text"><string>Desconectado</string></property></widget></item>
-      </layout>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>1</number>
+      </property>
+      <widget class="QWidget" name="tabPrincipal">
+       <attribute name="title">
+        <string>Principal</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_tab1">
+        <item>
+         <widget class="QGroupBox" name="g1">
+          <property name="title">
+           <string>Conexión UART</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_g1">
+           <item>
+            <widget class="QPushButton" name="btnConectar">
+             <property name="text">
+              <string>Conectar COM3</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="lblEstado">
+             <property name="text">
+              <string>Desconectado</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_g1">
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="g2">
+          <property name="title">
+           <string>Control de Hardware</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_g2">
+           <item>
+            <widget class="QPushButton" name="btnStart">
+             <property name="text">
+              <string>START</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnStop">
+             <property name="text">
+              <string>STOP</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnReset">
+             <property name="text">
+              <string>RESET</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_g2">
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTextEdit" name="txtLog">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="placeholderText">
+           <string>&gt;_ Monitor General UART...</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabSimulacion">
+       <attribute name="title">
+        <string>Inyección Manual</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_tab2">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_entry">
+          <item>
+           <widget class="QLabel" name="lblCaja">
+            <property name="text">
+             <string>Caja (cm):</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="txtCajaNum">
+            <property name="text">
+             <string>6</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignmentFlag::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnSimEntry">
+            <property name="text">
+             <string>Simular EntryBox</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_entry">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="gSensores_3">
+          <property name="title">
+           <string>Configurar Salidas</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_cfg">
+           <item>
+            <widget class="QLineEdit" name="Vel">
+             <property name="text">
+              <string>1</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="Out0Config">
+             <property name="text">
+              <string>6</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="Out1Config">
+             <property name="text">
+              <string>8</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="Out2Config">
+             <property name="text">
+              <string>10</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_cfg">
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="SendConfigOut">
+             <property name="text">
+              <string>Enviar</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_hardware">
+          <item>
+           <widget class="QGroupBox" name="gServos">
+            <property name="title">
+             <string>Pateadores (Servos)</string>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_servos">
+             <item>
+              <widget class="QPushButton" name="btnSimServo0">
+               <property name="text">
+                <string>Patear S0</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btnSimServo1">
+               <property name="text">
+                <string>Patear S1</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btnSimServo2">
+               <property name="text">
+                <string>Patear S2</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="gSensores">
+            <property name="title">
+             <string>Sensores IR Físicos</string>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_irs">
+             <item>
+              <widget class="QPushButton" name="btnSimIr0">
+               <property name="text">
+                <string>Activar IR0</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btnSimIr1">
+               <property name="text">
+                <string>Activar IR1</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btnSimIr2">
+               <property name="text">
+                <string>Activar IR2</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QTextEdit" name="txtLogMicro">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="placeholderText">
+           <string>&gt;_ Monitor de Eventos Simulados y Retornos del Micro...</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabAvanzado">
+       <attribute name="title">
+        <string>Avanzado</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_tab3">
+        <item>
+         <widget class="QLabel" name="lblProximamente">
+          <property name="text">
+           <string>Espacio para futuras configuraciones...</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignmentFlag::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
-    <item>
-     <widget class="QGroupBox" name="g2"><property name="title"><string>Control</string></property>
-      <layout class="QHBoxLayout">
-       <item><widget class="QPushButton" name="btnStart"><property name="text"><string>START</string></property></widget></item>
-       <item><widget class="QPushButton" name="btnStop"><property name="text"><string>STOP</string></property></widget></item>
-       <item><widget class="QPushButton" name="btnReset"><property name="text"><string>RESET</string></property></widget></item>
-      </layout>
-     </widget>
-    </item>
-    <item><widget class="QTextEdit" name="txtLog"><property name="readOnly"><bool>true</bool></property></widget></item>
    </layout>
   </widget>
  </widget>
+ <resources/>
+ <connections/>
 </ui>

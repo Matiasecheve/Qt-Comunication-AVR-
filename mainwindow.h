@@ -27,6 +27,16 @@ private slots:
     void on_btnReset_clicked();
     void readSerial(); // Recepción de datos
 
+    void on_btnSimIr0_clicked();
+
+    void on_btnSimIr1_clicked();
+
+    void on_btnSimIr2_clicked();
+
+    void on_SendConfigOut_clicked();
+
+    void on_btnSimServo1_clicked();
+
 private:
     Ui::MainWindow *ui;
     QSerialPort *serial;
