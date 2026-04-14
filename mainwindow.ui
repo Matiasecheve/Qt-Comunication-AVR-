@@ -55,7 +55,7 @@ QLabel { font-weight: bold; }
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tabPrincipal">
        <attribute name="title">
@@ -331,6 +331,13 @@ QLabel { font-weight: bold; }
             <widget class="QPushButton" name="sendTimeout">
              <property name="text">
               <string>Enviar Timeout</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="checkBox">
+             <property name="text">
+              <string>Forzar Timeout</string>
              </property>
             </widget>
            </item>

@@ -40,6 +40,8 @@ private slots:
 
     void on_sendTimeout_clicked();
 
+    void on_checkBox_checkStateChanged(const Qt::CheckState &arg1);
+
 private:
     Ui::MainWindow *ui;
     QSerialPort *serial;

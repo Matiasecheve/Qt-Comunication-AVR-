@@ -11,6 +11,7 @@
 
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
+#include <QtWidgets/QCheckBox>
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QLabel>
@@ -70,6 +71,7 @@ public:
     QLabel *lblTextTimeout;
     QLineEdit *textTimeout;
     QPushButton *sendTimeout;
+    QCheckBox *checkBox;
     QSpacerItem *horizontalSpacer_timeout;
     QHBoxLayout *horizontalLayout_hardware;
     QGroupBox *gServos;
@@ -303,6 +305,11 @@ public:
 
         horizontalLayout_timeout->addWidget(sendTimeout);
 
+        checkBox = new QCheckBox(gTimeout_servo);
+        checkBox->setObjectName("checkBox");
+
+        horizontalLayout_timeout->addWidget(checkBox);
+
         horizontalSpacer_timeout = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
 
         horizontalLayout_timeout->addItem(horizontalSpacer_timeout);
@@ -384,7 +391,7 @@ public:
 
         retranslateUi(MainWindow);
 
-        tabWidget->setCurrentIndex(1);
+        tabWidget->setCurrentIndex(0);
 
 
         QMetaObject::connectSlotsByName(MainWindow);
@@ -418,6 +425,7 @@ public:
         lblTextTimeout->setText(QCoreApplication::translate("MainWindow", "Tiempo (ms):", nullptr));
         textTimeout->setText(QCoreApplication::translate("MainWindow", "160", nullptr));
         sendTimeout->setText(QCoreApplication::translate("MainWindow", "Enviar Timeout", nullptr));
+        checkBox->setText(QCoreApplication::translate("MainWindow", "Forzar Timeout", nullptr));
         gServos->setTitle(QCoreApplication::translate("MainWindow", "Pateadores (Servos)", nullptr));
         btnSimServo0->setText(QCoreApplication::translate("MainWindow", "Patear S0", nullptr));
         btnSimServo1->setText(QCoreApplication::translate("MainWindow", "Patear S1", nullptr));

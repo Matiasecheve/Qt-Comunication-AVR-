@@ -81,9 +81,14 @@ void MainWindow::procesarComandoMicro(uint8_t cmd, QByteArray payload) {
         break;
 
     case 0x40: // Configuración OK
-        ui->txtLog->append(">> Micro: ACK (0x40) - Configuración guardada en la RAM.");
+        if (payload.size() >= 3) {
+            // Desenmascarado seguro forzando a entero de 8 bits (quint8)
+            ui->txtLogMicro->append(">> Micro: ACK (0x40) - Salidas seteadas -> S0: " +
+                                    QString::number(static_cast<quint8>(payload[0])) + "cm | S1: " +
+                                    QString::number(static_cast<quint8>(payload[1])) + "cm | S2: " +
+                                    QString::number(static_cast<quint8>(payload[2])) + "cm.");
+        }
         break;
-
     case 0x50: // Start / Confirmación de que arrancó
         setEstado(Corriendo);
         ui->txtLog->append(">> Micro: ACK (0x50) - cinta en movimiento.");
@@ -119,11 +124,18 @@ void MainWindow::procesarComandoMicro(uint8_t cmd, QByteArray payload) {
         // Leemos el payload para saber qué tamaño de caja es (ej: 6, 8 o 10)
         ui->txtLog->append(">> Micro: Evento (0x5F) - Caja física de " + QString::number(payload[0]) + "cm detectada.");
         break;
+    case 0x55:
+        if(payload.size() >= 2) {
+            // Desenmascarado seguro usando quint8
+            uint16_t tiempoConfirmado = static_cast<quint8>(payload[0]) | (static_cast<quint8>(payload[1]) << 8);
+            ui->txtLogMicro->append(">> Micro: ACK (0x55) - Tiempo de reacción configurado en " + QString::number(tiempoConfirmado) + " ms.");
+        }
+    break;
     }
 }
 // --- SLOTS (INTERFAZ) ---
 
-void MainWindow::on_btnConectar_clicked() {
+void MainWindow::on_btnConectar_clicked(){
     // Si el puerto YA está abierto, lo cerramos (Desconectar)
     if (serial->isOpen()) {
         serial->close();
@@ -152,6 +164,8 @@ void MainWindow::enviarComando(uint8_t cmd, QByteArray payload) {
 
     QByteArray frame;
     uint8_t cks = 0;
+
+    // RESTAURADO: La librería espera que LEN sea 2 + el tamaño del payload
     uint8_t len = 2 + payload.size();
 
     frame.append('U'); frame.append('N'); frame.append('E'); frame.append('R');
@@ -204,6 +218,8 @@ void MainWindow::readSerial() {
         if (tramaBuffer.size() < 6) break;
 
         uint8_t lenField = (uint8_t)tramaBuffer.at(4);
+
+        // RESTAURADO: El tamaño total es 6 (Header) + LEN
         int tramaTotalEsperada = 6 + lenField;
 
         if (tramaBuffer.size() < tramaTotalEsperada) break;
@@ -218,9 +234,9 @@ void MainWindow::readSerial() {
         if (cksCalculado == cksRecibido) {
             uint8_t cmd = (uint8_t)tramaBuffer.at(6);
 
-            // EXTRAEMOS LA CARGA ÚTIL (PAYLOAD)
-            // Empieza en el byte 7, y su longitud es (lenField - 1 byte del CMD)
-            QByteArray payload = tramaBuffer.mid(7, lenField - 1);
+            // LA CORRECCIÓN DEFINITIVA:
+            // Si LEN = 2 + payload, entonces el payload mide LEN - 2.
+            QByteArray payload = tramaBuffer.mid(7, lenField - 2);
 
             // Le pasamos el comando y el contenido a la función
             procesarComandoMicro(cmd, payload);
@@ -374,14 +390,32 @@ void MainWindow::on_sendTimeout_clicked()
     if(ok){
         QByteArray payload;
 
-        // Empaquetado de 16 bits en Little Endian (Byte Menos Significativo primero)
-        payload.append((char)(timeout & 0xFF));          // Byte LSB (Low)
-        payload.append((char)((timeout >> 8) & 0xFF));   // Byte MSB (High)
+        // Empaquetado seguro forzando enteros sin signo (evita valores negativos)
+        quint8 byteLow = timeout & 0xFF;
+        quint8 byteHigh = (timeout >> 8) & 0xFF;
+
+        payload.append(static_cast<char>(byteLow));
+        payload.append(static_cast<char>(byteHigh));
 
         enviarComando(0x55, payload);
         ui->txtLogMicro->append("SISTEMA: Solicitando cambio de configuración en el Tiempo de reacción...");
 
-    }else{
+    } else {
         ui->txtLogMicro->append("!! ERROR: Ingrese números válidos en la configuración de Tiempo de reacción.");
     }
+}
+
+void MainWindow::on_checkBox_checkStateChanged(const Qt::CheckState &arg1)
+{
+    QByteArray payload;
+
+    if(arg1 == Qt::Checked){
+        ui->txtLogMicro->append("CUIDADO: Estas forzando el tiempo de patada. Esto puede dar lugar a comportamiento no deseado.");
+        payload.append((char)0x01); // 1 = Modo Manual
+    } else {
+        ui->txtLogMicro->append("Timeout automático seteado.");
+        payload.append((char)0x00); // 0 = Modo Automático
+    }
+
+    enviarComando(0x56, payload); // CMD 0x56 para toggle manual/auto
 }
