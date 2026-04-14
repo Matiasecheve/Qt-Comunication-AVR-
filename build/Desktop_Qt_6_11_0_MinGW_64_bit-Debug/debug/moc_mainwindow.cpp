@@ -49,7 +49,17 @@ template <> constexpr inline auto MainWindow::qt_create_metaobjectdata<qt_meta_t
         "on_btnSimIr1_clicked",
         "on_btnSimIr2_clicked",
         "on_SendConfigOut_clicked",
-        "on_btnSimServo1_clicked"
+        "on_btnSimServo1_clicked",
+        "on_btnSimServo0_clicked",
+        "on_btnSimServo2_clicked",
+        "formatearAscii",
+        "datos",
+        "procesarComandoMicro",
+        "uint8_t",
+        "cmd",
+        "payload",
+        "on_sendVel_clicked",
+        "on_sendTimeout_clicked"
     };
 
     QtMocHelpers::UintData qt_methods {
@@ -73,6 +83,22 @@ template <> constexpr inline auto MainWindow::qt_create_metaobjectdata<qt_meta_t
         QtMocHelpers::SlotData<void()>(10, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'on_btnSimServo1_clicked'
         QtMocHelpers::SlotData<void()>(11, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'on_btnSimServo0_clicked'
+        QtMocHelpers::SlotData<void()>(12, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'on_btnSimServo2_clicked'
+        QtMocHelpers::SlotData<void()>(13, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'formatearAscii'
+        QtMocHelpers::SlotData<QString(const QByteArray &)>(14, 2, QMC::AccessPrivate, QMetaType::QString, {{
+            { QMetaType::QByteArray, 15 },
+        }}),
+        // Slot 'procesarComandoMicro'
+        QtMocHelpers::SlotData<void(uint8_t, QByteArray)>(16, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { 0x80000000 | 17, 18 }, { QMetaType::QByteArray, 19 },
+        }}),
+        // Slot 'on_sendVel_clicked'
+        QtMocHelpers::SlotData<void()>(20, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'on_sendTimeout_clicked'
+        QtMocHelpers::SlotData<void()>(21, 2, QMC::AccessPrivate, QMetaType::Void),
     };
     QtMocHelpers::UintData qt_properties {
     };
@@ -106,10 +132,16 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 7: _t->on_btnSimIr2_clicked(); break;
         case 8: _t->on_SendConfigOut_clicked(); break;
         case 9: _t->on_btnSimServo1_clicked(); break;
+        case 10: _t->on_btnSimServo0_clicked(); break;
+        case 11: _t->on_btnSimServo2_clicked(); break;
+        case 12: { QString _r = _t->formatearAscii((*reinterpret_cast<std::add_pointer_t<QByteArray>>(_a[1])));
+            if (_a[0]) *reinterpret_cast<QString*>(_a[0]) = std::move(_r); }  break;
+        case 13: _t->procesarComandoMicro((*reinterpret_cast<std::add_pointer_t<uint8_t>>(_a[1])),(*reinterpret_cast<std::add_pointer_t<QByteArray>>(_a[2]))); break;
+        case 14: _t->on_sendVel_clicked(); break;
+        case 15: _t->on_sendTimeout_clicked(); break;
         default: ;
         }
     }
-    (void)_a;
 }
 
 const QMetaObject *MainWindow::metaObject() const
@@ -131,14 +163,14 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 10)
+        if (_id < 16)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 10;
+        _id -= 16;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 10)
+        if (_id < 16)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 10;
+        _id -= 16;
     }
     return _id;
 }

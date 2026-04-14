@@ -26,16 +26,19 @@ private slots:
     void on_btnStop_clicked();
     void on_btnReset_clicked();
     void readSerial(); // Recepción de datos
-
     void on_btnSimIr0_clicked();
-
     void on_btnSimIr1_clicked();
-
     void on_btnSimIr2_clicked();
-
     void on_SendConfigOut_clicked();
-
     void on_btnSimServo1_clicked();
+    void on_btnSimServo0_clicked();
+    void on_btnSimServo2_clicked();
+    QString formatearAscii(const QByteArray &datos);
+    void procesarComandoMicro(uint8_t cmd, QByteArray payload);
+
+    void on_sendVel_clicked();
+
+    void on_sendTimeout_clicked();
 
 private:
     Ui::MainWindow *ui;

@@ -54,12 +54,23 @@ public:
     QSpacerItem *horizontalSpacer_entry;
     QGroupBox *gSensores_3;
     QHBoxLayout *horizontalLayout_cfg;
-    QLineEdit *Vel;
     QLineEdit *Out0Config;
     QLineEdit *Out1Config;
     QLineEdit *Out2Config;
     QSpacerItem *horizontalSpacer_cfg;
     QPushButton *SendConfigOut;
+    QGroupBox *gVelocidad_indep;
+    QHBoxLayout *horizontalLayout_vel_indep;
+    QLabel *lblTextVel;
+    QLineEdit *textvel;
+    QPushButton *sendVel;
+    QSpacerItem *horizontalSpacer_vel_indep;
+    QGroupBox *gTimeout_servo;
+    QHBoxLayout *horizontalLayout_timeout;
+    QLabel *lblTextTimeout;
+    QLineEdit *textTimeout;
+    QPushButton *sendTimeout;
+    QSpacerItem *horizontalSpacer_timeout;
     QHBoxLayout *horizontalLayout_hardware;
     QGroupBox *gServos;
     QHBoxLayout *horizontalLayout_servos;
@@ -80,7 +91,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName("MainWindow");
-        MainWindow->resize(508, 334);
+        MainWindow->resize(507, 600);
         MainWindow->setStyleSheet(QString::fromUtf8("/* Dise\303\261o SCADA / Industrial Dark Mode */\n"
 "QWidget { background-color: #2b2b2b; color: #e0e0e0; font-family: \"Segoe UI\", sans-serif; }\n"
 "\n"
@@ -215,11 +226,6 @@ public:
         gSensores_3->setObjectName("gSensores_3");
         horizontalLayout_cfg = new QHBoxLayout(gSensores_3);
         horizontalLayout_cfg->setObjectName("horizontalLayout_cfg");
-        Vel = new QLineEdit(gSensores_3);
-        Vel->setObjectName("Vel");
-
-        horizontalLayout_cfg->addWidget(Vel);
-
         Out0Config = new QLineEdit(gSensores_3);
         Out0Config->setObjectName("Out0Config");
         Out0Config->setAlignment(Qt::AlignmentFlag::AlignCenter);
@@ -249,6 +255,60 @@ public:
 
 
         verticalLayout_tab2->addWidget(gSensores_3);
+
+        gVelocidad_indep = new QGroupBox(tabSimulacion);
+        gVelocidad_indep->setObjectName("gVelocidad_indep");
+        horizontalLayout_vel_indep = new QHBoxLayout(gVelocidad_indep);
+        horizontalLayout_vel_indep->setObjectName("horizontalLayout_vel_indep");
+        lblTextVel = new QLabel(gVelocidad_indep);
+        lblTextVel->setObjectName("lblTextVel");
+
+        horizontalLayout_vel_indep->addWidget(lblTextVel);
+
+        textvel = new QLineEdit(gVelocidad_indep);
+        textvel->setObjectName("textvel");
+        textvel->setAlignment(Qt::AlignmentFlag::AlignCenter);
+
+        horizontalLayout_vel_indep->addWidget(textvel);
+
+        sendVel = new QPushButton(gVelocidad_indep);
+        sendVel->setObjectName("sendVel");
+
+        horizontalLayout_vel_indep->addWidget(sendVel);
+
+        horizontalSpacer_vel_indep = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
+
+        horizontalLayout_vel_indep->addItem(horizontalSpacer_vel_indep);
+
+
+        verticalLayout_tab2->addWidget(gVelocidad_indep);
+
+        gTimeout_servo = new QGroupBox(tabSimulacion);
+        gTimeout_servo->setObjectName("gTimeout_servo");
+        horizontalLayout_timeout = new QHBoxLayout(gTimeout_servo);
+        horizontalLayout_timeout->setObjectName("horizontalLayout_timeout");
+        lblTextTimeout = new QLabel(gTimeout_servo);
+        lblTextTimeout->setObjectName("lblTextTimeout");
+
+        horizontalLayout_timeout->addWidget(lblTextTimeout);
+
+        textTimeout = new QLineEdit(gTimeout_servo);
+        textTimeout->setObjectName("textTimeout");
+        textTimeout->setAlignment(Qt::AlignmentFlag::AlignCenter);
+
+        horizontalLayout_timeout->addWidget(textTimeout);
+
+        sendTimeout = new QPushButton(gTimeout_servo);
+        sendTimeout->setObjectName("sendTimeout");
+
+        horizontalLayout_timeout->addWidget(sendTimeout);
+
+        horizontalSpacer_timeout = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
+
+        horizontalLayout_timeout->addItem(horizontalSpacer_timeout);
+
+
+        verticalLayout_tab2->addWidget(gTimeout_servo);
 
         horizontalLayout_hardware = new QHBoxLayout();
         horizontalLayout_hardware->setObjectName("horizontalLayout_hardware");
@@ -346,11 +406,18 @@ public:
         txtCajaNum->setText(QCoreApplication::translate("MainWindow", "6", nullptr));
         btnSimEntry->setText(QCoreApplication::translate("MainWindow", "Simular EntryBox", nullptr));
         gSensores_3->setTitle(QCoreApplication::translate("MainWindow", "Configurar Salidas", nullptr));
-        Vel->setText(QCoreApplication::translate("MainWindow", "1", nullptr));
         Out0Config->setText(QCoreApplication::translate("MainWindow", "6", nullptr));
         Out1Config->setText(QCoreApplication::translate("MainWindow", "8", nullptr));
         Out2Config->setText(QCoreApplication::translate("MainWindow", "10", nullptr));
         SendConfigOut->setText(QCoreApplication::translate("MainWindow", "Enviar", nullptr));
+        gVelocidad_indep->setTitle(QCoreApplication::translate("MainWindow", "Cambiar Velocidad (CMD 0x54)", nullptr));
+        lblTextVel->setText(QCoreApplication::translate("MainWindow", "Velocidad:", nullptr));
+        textvel->setText(QCoreApplication::translate("MainWindow", "1", nullptr));
+        sendVel->setText(QCoreApplication::translate("MainWindow", "Enviar Vel", nullptr));
+        gTimeout_servo->setTitle(QCoreApplication::translate("MainWindow", "Configurar Patada Servo (CMD 0x55)", nullptr));
+        lblTextTimeout->setText(QCoreApplication::translate("MainWindow", "Tiempo (ms):", nullptr));
+        textTimeout->setText(QCoreApplication::translate("MainWindow", "160", nullptr));
+        sendTimeout->setText(QCoreApplication::translate("MainWindow", "Enviar Timeout", nullptr));
         gServos->setTitle(QCoreApplication::translate("MainWindow", "Pateadores (Servos)", nullptr));
         btnSimServo0->setText(QCoreApplication::translate("MainWindow", "Patear S0", nullptr));
         btnSimServo1->setText(QCoreApplication::translate("MainWindow", "Patear S1", nullptr));

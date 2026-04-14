@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QDebug>
+#include <QRegularExpression>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -70,12 +71,11 @@ void MainWindow::setEstado(State nuevoEstado) {
     }
 }
 
-// ESTA FUNCIÓN AHORA ES LA ÚNICA QUE TIENE PERMISO DE CAMBIAR EL ESTADO
-void MainWindow::procesarComandoMicro(uint8_t cmd) {
+void MainWindow::procesarComandoMicro(uint8_t cmd, QByteArray payload) {
     switch (cmd) {
     case 0xF0: // Handshake / Alive
         if (m_estadoActual != Corriendo) {
-            setEstado(Listo); // El micro avisa que despertó y pasamos a Azul
+            setEstado(Listo);
         }
         ui->txtLog->append(">> Micro: ACK (0xF0) - Sistema en línea y conectado.");
         break;
@@ -85,36 +85,42 @@ void MainWindow::procesarComandoMicro(uint8_t cmd) {
         break;
 
     case 0x50: // Start / Confirmación de que arrancó
-        setEstado(Corriendo); // <--- ACÁ LA INTERFAZ PASA A VERDE
+        setEstado(Corriendo);
         ui->txtLog->append(">> Micro: ACK (0x50) - cinta en movimiento.");
         break;
 
     case 0x51: // Stop
-        setEstado(Detenido); // <--- ACÁ LA INTERFAZ PASA A NARANJA
+        setEstado(Detenido);
         ui->txtLog->append(">> Micro: ACK (0x51) -  cinta detenida.");
         break;
 
     case 0x53: // Reset
-        setEstado(Desconectado); // <--- ACÁ LA INTERFAZ PASA A GRIS
+        setEstado(Desconectado);
         ui->btnConectar->setEnabled(true);
         ui->txtLog->append(">> Micro: ACK (0x53) - Memoria borrada y hardware reiniciado.");
-        break;
-
-    case 0x5F: // Nueva Caja
-        ui->txtLog->append(">> Micro: Evento (0x5F) - Nueva caja física detectada en cinta.");
         break;
 
     case 0x5E: // Evento Sensor Físico
         ui->txtLog->append(">> Micro: Evento (0x5E) - Sensor Infrarrojo activado.");
         break;
+
     case 0x5A: // Error: Arranque sin configuración
-        // Aseguramos que el estado vuelva/siga en LISTO
         setEstado(Listo);
         ui->txtLog->append("!! Micro: ERROR (0x5A) - Intento de arranque rechazado. No se ha asignado configuración a las salidas.");
         break;
+
+    case 0x70: { // 2. CORRECCIÓN: Llaves agregadas para aislar la memoria de 'texto'
+        QString texto = QString::fromLatin1(payload);
+        ui->txtLogMicro->append("INFO: " + texto);
+        break;
+    } // <-- Fin de las llaves
+
+    case 0x5F: // 3. CORRECCIÓN: Unificamos el caso 0x5F para evitar duplicados
+        // Leemos el payload para saber qué tamaño de caja es (ej: 6, 8 o 10)
+        ui->txtLog->append(">> Micro: Evento (0x5F) - Caja física de " + QString::number(payload[0]) + "cm detectada.");
+        break;
     }
 }
-
 // --- SLOTS (INTERFAZ) ---
 
 void MainWindow::on_btnConectar_clicked() {
@@ -167,10 +173,21 @@ void MainWindow::enviarComando(uint8_t cmd, QByteArray payload) {
 
 void MainWindow::readSerial() {
     QByteArray bufferIn = serial->readAll();
+
+    // 1. Mostrar la trama binaria cruda (Hexadecimal) en el Log Principal
     ui->txtLog->append("RX <- " + bufferIn.toHex(' ').toUpper());
+
+    // 2. Traducir a ASCII y mostrarlo en el Log del Micro
+    QString textoTraducido = formatearAscii(bufferIn);
+
+    // Solo imprimimos si el texto tiene algo más que puros puntos vacíos
+    if (!textoTraducido.trimmed().isEmpty() && textoTraducido.contains(QRegularExpression("[A-Za-z0-9]"))) {
+        ui->txtLogMicro->append("DEBUG: " + textoTraducido.trimmed());
+    }
 
     static QByteArray tramaBuffer;
     tramaBuffer.append(bufferIn);
+
 
     while (tramaBuffer.size() >= 8) {
         int index = tramaBuffer.indexOf("UNER");
@@ -200,10 +217,13 @@ void MainWindow::readSerial() {
 
         if (cksCalculado == cksRecibido) {
             uint8_t cmd = (uint8_t)tramaBuffer.at(6);
-            procesarComandoMicro(cmd);
-        } else {
-            if(ui->tabWidget->currentIndex() == 0) ui->txtLog->append("!! Error Checksum: Recibido " + QString::number(cksRecibido, 16) +" vs Calc " + QString::number(cksCalculado, 16));
-            if(ui->tabWidget->currentIndex() == 1) ui->txtLogMicro->append("!! Error Checksum: Recibido " + QString::number(cksRecibido, 16) +" vs Calc " + QString::number(cksCalculado, 16));
+
+            // EXTRAEMOS LA CARGA ÚTIL (PAYLOAD)
+            // Empieza en el byte 7, y su longitud es (lenField - 1 byte del CMD)
+            QByteArray payload = tramaBuffer.mid(7, lenField - 1);
+
+            // Le pasamos el comando y el contenido a la función
+            procesarComandoMicro(cmd, payload);
         }
 
         tramaBuffer.remove(0, tramaTotalEsperada);
@@ -213,23 +233,21 @@ void MainWindow::readSerial() {
 
 void MainWindow::on_SendConfigOut_clicked()
 {
-    bool okvel, ok0, ok1, ok2;
+    bool ok0, ok1, ok2;
 
-    int vel = ui->Vel->text().toInt(&okvel);
     int val0 = ui->Out0Config->text().toInt(&ok0);
     int val1 = ui->Out1Config->text().toInt(&ok1);
     int val2 = ui->Out2Config->text().toInt(&ok2);
 
-    if (ok0 && ok1 && ok2 && vel) {
+    if (ok0 && ok1 && ok2) {
         QByteArray payload;
-        payload.append((char)vel);
         payload.append((char)val0);
         payload.append((char)val1);
         payload.append((char)val2);
 
         enviarComando(0x40, payload);
         // NO cambiamos el estado acá, esperamos el ACK 0x40
-        ui->txtLogMicro->append("SISTEMA: Solicitando cambio de configuración...");
+        ui->txtLogMicro->append("SISTEMA: Solicitando cambio de configuración de salidas...");
     } else {
         ui->txtLogMicro->append("!! ERROR: Ingrese números válidos en la configuración de salidas.");
     }
@@ -287,12 +305,83 @@ void MainWindow::on_btnReset_clicked() {
     // NO cambiamos a Gris acá, esperamos el ACK 0x53
     ui->txtLog->append("SISTEMA: Solicitando Reset Integral...");
 }
+
+void MainWindow::on_btnSimServo0_clicked()
+{
+    QByteArray payload;
+    payload.append((char)0x01); // Máscara: Bit 0 activado (Servo 0)
+    payload.append((char)0x01); // Posición: Bit 0 en '1' (Extender)
+    enviarComando(0x52, payload);
+    ui->txtLogMicro->append("SIMULACIÓN: Pateando Servo 0...");
+}
+
 void MainWindow::on_btnSimServo1_clicked()
 {
     QByteArray payload;
-    payload.append((char)0x02); // Bit 1 (Servo 1)
-    payload.append((char)0x02); // Extender
+    payload.append((char)0x02); // Máscara: Bit 1 activado (Servo 1)
+    payload.append((char)0x02); // Posición: Bit 1 en '1' (Extender)
     enviarComando(0x52, payload);
     ui->txtLogMicro->append("SIMULACIÓN: Pateando Servo 1...");
 }
 
+void MainWindow::on_btnSimServo2_clicked()
+{
+    QByteArray payload;
+    payload.append((char)0x04); // Máscara: Bit 2 activado (Servo 2)
+    payload.append((char)0x04); // Posición: Bit 2 en '1' (Extender)
+    enviarComando(0x52, payload);
+    ui->txtLogMicro->append("SIMULACIÓN: Pateando Servo 2...");
+}
+
+QString MainWindow::formatearAscii(const QByteArray &datos) {
+    QString resultado;
+    for (char c : datos) {
+        // Dejamos pasar solo el rango ASCII imprimible (letras, números, símbolos)
+        // y los saltos de línea (\n).
+        if ((c >= 32 && c <= 126) || c == '\n') {
+            resultado.append(c);
+        } else {
+            // Si es un comando del protocolo (como 0xF0 o 0x50)
+            // o un retorno de carro (\r), ponemos un punto.
+            resultado.append('.');
+        }
+    }
+    return resultado;
+}
+
+void MainWindow::on_sendVel_clicked()
+{
+
+    bool ok;
+
+    int vel = ui->textvel->text().toInt(&ok);
+
+    if (ok) {
+        QByteArray payload;
+        payload.append((char)vel);
+        enviarComando(0x54, payload);
+        ui->txtLogMicro->append("SISTEMA: Solicitando cambio de configuración en la velocidad ...");
+    } else {
+        ui->txtLogMicro->append("!! ERROR: Ingrese números válidos en la configuración de salidas.");
+    }
+}
+
+void MainWindow::on_sendTimeout_clicked()
+{
+    bool ok;
+    int timeout = ui->textTimeout->text().toInt(&ok);
+
+    if(ok){
+        QByteArray payload;
+
+        // Empaquetado de 16 bits en Little Endian (Byte Menos Significativo primero)
+        payload.append((char)(timeout & 0xFF));          // Byte LSB (Low)
+        payload.append((char)((timeout >> 8) & 0xFF));   // Byte MSB (High)
+
+        enviarComando(0x55, payload);
+        ui->txtLogMicro->append("SISTEMA: Solicitando cambio de configuración en el Tiempo de reacción...");
+
+    }else{
+        ui->txtLogMicro->append("!! ERROR: Ingrese números válidos en la configuración de Tiempo de reacción.");
+    }
+}
