@@ -131,6 +131,13 @@ void MainWindow::procesarComandoMicro(uint8_t cmd, QByteArray payload) {
             ui->txtLogMicro->append(">> Micro: ACK (0x55) - Tiempo de reacción configurado en " + QString::number(tiempoConfirmado) + " ms.");
         }
     break;
+    case 0x57:
+        if(payload.size() >= 2) {
+            // Desenmascarado seguro usando quint8
+            uint16_t tiempoWaitConfirmado = static_cast<quint8>(payload[0]) | (static_cast<quint8>(payload[1]) << 8);
+            ui->txtLogMicro->append(">> Micro: ACK (0x57) - Tiempo de espera de medición configurado en " + QString::number(tiempoWaitConfirmado) + " ms.");
+        }
+        break;
     }
 }
 // --- SLOTS (INTERFAZ) ---
@@ -399,7 +406,6 @@ void MainWindow::on_sendTimeout_clicked()
 
         enviarComando(0x55, payload);
         ui->txtLogMicro->append("SISTEMA: Solicitando cambio de configuración en el Tiempo de reacción...");
-
     } else {
         ui->txtLogMicro->append("!! ERROR: Ingrese números válidos en la configuración de Tiempo de reacción.");
     }
@@ -419,3 +425,25 @@ void MainWindow::on_checkBox_checkStateChanged(const Qt::CheckState &arg1)
 
     enviarComando(0x56, payload); // CMD 0x56 para toggle manual/auto
 }
+void MainWindow::on_sendWaitCenter_clicked()
+{
+    bool ok;
+    int timeWait = ui->textWaitCenter->text().toInt(&ok);
+
+    if(ok){
+        QByteArray payload;
+
+        // Empaquetado seguro forzando enteros sin signo (evita valores negativos)
+        quint8 byteLow = timeWait & 0xFF;
+        quint8 byteHigh = (timeWait >> 8) & 0xFF;
+
+        payload.append(static_cast<char>(byteLow));
+        payload.append(static_cast<char>(byteHigh));
+
+        enviarComando(0x57, payload);
+        ui->txtLogMicro->append("SISTEMA: Solicitando cambio de configuración en el Retardo del HCSR04...");
+    } else {
+        ui->txtLogMicro->append("!! ERROR: Ingrese números válidos en la configuración de Retardo.");
+    }
+}
+

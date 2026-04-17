@@ -42,6 +42,8 @@ private slots:
 
     void on_checkBox_checkStateChanged(const Qt::CheckState &arg1);
 
+    void on_sendWaitCenter_clicked();
+
 private:
     Ui::MainWindow *ui;
     QSerialPort *serial;

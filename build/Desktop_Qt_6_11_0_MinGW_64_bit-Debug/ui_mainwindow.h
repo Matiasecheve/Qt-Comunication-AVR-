@@ -73,6 +73,12 @@ public:
     QPushButton *sendTimeout;
     QCheckBox *checkBox;
     QSpacerItem *horizontalSpacer_timeout;
+    QGroupBox *gWaitCenter;
+    QHBoxLayout *horizontalLayout_wait_center;
+    QLabel *lblTextWaitCenter;
+    QLineEdit *textWaitCenter;
+    QPushButton *sendWaitCenter;
+    QSpacerItem *horizontalSpacer_wait_center;
     QHBoxLayout *horizontalLayout_hardware;
     QGroupBox *gServos;
     QHBoxLayout *horizontalLayout_servos;
@@ -93,7 +99,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName("MainWindow");
-        MainWindow->resize(507, 600);
+        MainWindow->resize(567, 600);
         MainWindow->setStyleSheet(QString::fromUtf8("/* Dise\303\261o SCADA / Industrial Dark Mode */\n"
 "QWidget { background-color: #2b2b2b; color: #e0e0e0; font-family: \"Segoe UI\", sans-serif; }\n"
 "\n"
@@ -317,6 +323,33 @@ public:
 
         verticalLayout_tab2->addWidget(gTimeout_servo);
 
+        gWaitCenter = new QGroupBox(tabSimulacion);
+        gWaitCenter->setObjectName("gWaitCenter");
+        horizontalLayout_wait_center = new QHBoxLayout(gWaitCenter);
+        horizontalLayout_wait_center->setObjectName("horizontalLayout_wait_center");
+        lblTextWaitCenter = new QLabel(gWaitCenter);
+        lblTextWaitCenter->setObjectName("lblTextWaitCenter");
+
+        horizontalLayout_wait_center->addWidget(lblTextWaitCenter);
+
+        textWaitCenter = new QLineEdit(gWaitCenter);
+        textWaitCenter->setObjectName("textWaitCenter");
+        textWaitCenter->setAlignment(Qt::AlignmentFlag::AlignCenter);
+
+        horizontalLayout_wait_center->addWidget(textWaitCenter);
+
+        sendWaitCenter = new QPushButton(gWaitCenter);
+        sendWaitCenter->setObjectName("sendWaitCenter");
+
+        horizontalLayout_wait_center->addWidget(sendWaitCenter);
+
+        horizontalSpacer_wait_center = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
+
+        horizontalLayout_wait_center->addItem(horizontalSpacer_wait_center);
+
+
+        verticalLayout_tab2->addWidget(gWaitCenter);
+
         horizontalLayout_hardware = new QHBoxLayout();
         horizontalLayout_hardware->setObjectName("horizontalLayout_hardware");
         gServos = new QGroupBox(tabSimulacion);
@@ -391,7 +424,7 @@ public:
 
         retranslateUi(MainWindow);
 
-        tabWidget->setCurrentIndex(0);
+        tabWidget->setCurrentIndex(1);
 
 
         QMetaObject::connectSlotsByName(MainWindow);
@@ -426,6 +459,10 @@ public:
         textTimeout->setText(QCoreApplication::translate("MainWindow", "160", nullptr));
         sendTimeout->setText(QCoreApplication::translate("MainWindow", "Enviar Timeout", nullptr));
         checkBox->setText(QCoreApplication::translate("MainWindow", "Forzar Timeout", nullptr));
+        gWaitCenter->setTitle(QCoreApplication::translate("MainWindow", "Configurar Retardo Centrado HCSR04 (CMD 0x57)", nullptr));
+        lblTextWaitCenter->setText(QCoreApplication::translate("MainWindow", "Tiempo (ms):", nullptr));
+        textWaitCenter->setText(QCoreApplication::translate("MainWindow", "200", nullptr));
+        sendWaitCenter->setText(QCoreApplication::translate("MainWindow", "Enviar Retardo", nullptr));
         gServos->setTitle(QCoreApplication::translate("MainWindow", "Pateadores (Servos)", nullptr));
         btnSimServo0->setText(QCoreApplication::translate("MainWindow", "Patear S0", nullptr));
         btnSimServo1->setText(QCoreApplication::translate("MainWindow", "Patear S1", nullptr));
