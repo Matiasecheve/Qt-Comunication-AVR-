@@ -44,10 +44,12 @@ public:
     QPushButton *btnStart;
     QPushButton *btnStop;
     QPushButton *btnReset;
+    QCheckBox *chkTimeMode;
     QSpacerItem *horizontalSpacer_g2;
     QTextEdit *txtLog;
     QWidget *tabSimulacion;
-    QVBoxLayout *verticalLayout_tab2;
+    QHBoxLayout *horizontalLayout_TabSim;
+    QVBoxLayout *verticalLayout_Controles;
     QHBoxLayout *horizontalLayout_entry;
     QLabel *lblCaja;
     QLineEdit *txtCajaNum;
@@ -91,6 +93,22 @@ public:
     QPushButton *btnSimIr1;
     QPushButton *btnSimIr2;
     QTextEdit *txtLogMicro;
+    QVBoxLayout *verticalLayout_Monitores;
+    QGroupBox *gQueues;
+    QVBoxLayout *verticalLayout_Queues;
+    QLabel *lblTitleQ0;
+    QLabel *lblQueue0;
+    QLabel *lblTitleQ1;
+    QLabel *lblQueue1;
+    QLabel *lblTitleQ2;
+    QLabel *lblQueue2;
+    QGroupBox *gParametros;
+    QVBoxLayout *verticalLayout_Params;
+    QLabel *lblVelocidadCinta;
+    QLabel *lblTiempoS0;
+    QLabel *lblTiempoS1;
+    QLabel *lblTiempoS2;
+    QSpacerItem *verticalSpacer_Monitores;
     QWidget *tabAvanzado;
     QVBoxLayout *verticalLayout_tab3;
     QLabel *lblProximamente;
@@ -99,7 +117,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName("MainWindow");
-        MainWindow->resize(567, 600);
+        MainWindow->resize(850, 630);
         MainWindow->setStyleSheet(QString::fromUtf8("/* Dise\303\261o SCADA / Industrial Dark Mode */\n"
 "QWidget { background-color: #2b2b2b; color: #e0e0e0; font-family: \"Segoe UI\", sans-serif; }\n"
 "\n"
@@ -136,6 +154,39 @@ public:
 "QLabel#lblEstado { font-weight: bold; color: #f0ad4e; font-size: 13px; }\n"
 "QLabel"
                         " { font-weight: bold; }\n"
+"\n"
+"/* --- VISUALIZADOR SCADA DE COLAS --- */\n"
+"QLabel#lblQueue0, QLabel#lblQueue1, QLabel#lblQueue2 {\n"
+"    font-family: \"Consolas\", monospace;\n"
+"    font-size: 15px;\n"
+"    background-color: #1a1a1a;\n"
+"    padding: 8px;\n"
+"    border-radius: 5px;\n"
+"}\n"
+"QLabel#lblQueue0 { color: #ff4d4d; border: 1px solid #ff4d4d; } /* Rojo - Zona 0 */\n"
+"QLabel#lblQueue1 { color: #ffcc00; border: 1px solid #ffcc00; } /* Amarillo - Zona 1 */\n"
+"QLabel#lblQueue2 { color: #33cc33; border: 1px solid #33cc33; } /* Verde - Zona 2 */\n"
+"\n"
+"QLabel#lblTitleQ0, QLabel#lblTitleQ1, QLabel#lblTitleQ2 {\n"
+"    color: #aaaaaa;\n"
+"    font-size: 12px;\n"
+"    margin-top: 5px;\n"
+"}\n"
+"\n"
+"/* --- VISUALIZADOR DE CINEM\303\201TICA --- */\n"
+"QLabel#lblVelocidadCinta, QLabel#lblTiempoS0, QLabel#lblTiempoS1, QLabel#lblTiempoS2 {\n"
+"    font-family: \"Consolas\", monospace;\n"
+"    font-size: 14px;\n"
+"    background-color: #1a1a1a;\n"
+"    padding: 6px;\n"
+"    border-radius: 4px;\n"
+"    m"
+                        "argin-top: 2px;\n"
+"}\n"
+"QLabel#lblVelocidadCinta { color: #5bc0de; border: 1px solid #5bc0de; } /* Celeste */\n"
+"QLabel#lblTiempoS0 { color: #ff4d4d; border: 1px solid #ff4d4d; } /* Rojo */\n"
+"QLabel#lblTiempoS1 { color: #ffcc00; border: 1px solid #ffcc00; } /* Amarillo */\n"
+"QLabel#lblTiempoS2 { color: #33cc33; border: 1px solid #33cc33; } /* Verde */\n"
 "   "));
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName("centralwidget");
@@ -187,6 +238,12 @@ public:
 
         horizontalLayout_g2->addWidget(btnReset);
 
+        chkTimeMode = new QCheckBox(g2);
+        chkTimeMode->setObjectName("chkTimeMode");
+        chkTimeMode->setStyleSheet(QString::fromUtf8("margin-left: 15px; color: #5bc0de;"));
+
+        horizontalLayout_g2->addWidget(chkTimeMode);
+
         horizontalSpacer_g2 = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
 
         horizontalLayout_g2->addItem(horizontalSpacer_g2);
@@ -203,8 +260,10 @@ public:
         tabWidget->addTab(tabPrincipal, QString());
         tabSimulacion = new QWidget();
         tabSimulacion->setObjectName("tabSimulacion");
-        verticalLayout_tab2 = new QVBoxLayout(tabSimulacion);
-        verticalLayout_tab2->setObjectName("verticalLayout_tab2");
+        horizontalLayout_TabSim = new QHBoxLayout(tabSimulacion);
+        horizontalLayout_TabSim->setObjectName("horizontalLayout_TabSim");
+        verticalLayout_Controles = new QVBoxLayout();
+        verticalLayout_Controles->setObjectName("verticalLayout_Controles");
         horizontalLayout_entry = new QHBoxLayout();
         horizontalLayout_entry->setObjectName("horizontalLayout_entry");
         lblCaja = new QLabel(tabSimulacion);
@@ -228,7 +287,7 @@ public:
         horizontalLayout_entry->addItem(horizontalSpacer_entry);
 
 
-        verticalLayout_tab2->addLayout(horizontalLayout_entry);
+        verticalLayout_Controles->addLayout(horizontalLayout_entry);
 
         gSensores_3 = new QGroupBox(tabSimulacion);
         gSensores_3->setObjectName("gSensores_3");
@@ -262,7 +321,7 @@ public:
         horizontalLayout_cfg->addWidget(SendConfigOut);
 
 
-        verticalLayout_tab2->addWidget(gSensores_3);
+        verticalLayout_Controles->addWidget(gSensores_3);
 
         gVelocidad_indep = new QGroupBox(tabSimulacion);
         gVelocidad_indep->setObjectName("gVelocidad_indep");
@@ -289,7 +348,7 @@ public:
         horizontalLayout_vel_indep->addItem(horizontalSpacer_vel_indep);
 
 
-        verticalLayout_tab2->addWidget(gVelocidad_indep);
+        verticalLayout_Controles->addWidget(gVelocidad_indep);
 
         gTimeout_servo = new QGroupBox(tabSimulacion);
         gTimeout_servo->setObjectName("gTimeout_servo");
@@ -321,7 +380,7 @@ public:
         horizontalLayout_timeout->addItem(horizontalSpacer_timeout);
 
 
-        verticalLayout_tab2->addWidget(gTimeout_servo);
+        verticalLayout_Controles->addWidget(gTimeout_servo);
 
         gWaitCenter = new QGroupBox(tabSimulacion);
         gWaitCenter->setObjectName("gWaitCenter");
@@ -348,7 +407,7 @@ public:
         horizontalLayout_wait_center->addItem(horizontalSpacer_wait_center);
 
 
-        verticalLayout_tab2->addWidget(gWaitCenter);
+        verticalLayout_Controles->addWidget(gWaitCenter);
 
         horizontalLayout_hardware = new QHBoxLayout();
         horizontalLayout_hardware->setObjectName("horizontalLayout_hardware");
@@ -397,13 +456,89 @@ public:
         horizontalLayout_hardware->addWidget(gSensores);
 
 
-        verticalLayout_tab2->addLayout(horizontalLayout_hardware);
+        verticalLayout_Controles->addLayout(horizontalLayout_hardware);
 
         txtLogMicro = new QTextEdit(tabSimulacion);
         txtLogMicro->setObjectName("txtLogMicro");
         txtLogMicro->setReadOnly(true);
 
-        verticalLayout_tab2->addWidget(txtLogMicro);
+        verticalLayout_Controles->addWidget(txtLogMicro);
+
+
+        horizontalLayout_TabSim->addLayout(verticalLayout_Controles);
+
+        verticalLayout_Monitores = new QVBoxLayout();
+        verticalLayout_Monitores->setObjectName("verticalLayout_Monitores");
+        gQueues = new QGroupBox(tabSimulacion);
+        gQueues->setObjectName("gQueues");
+        verticalLayout_Queues = new QVBoxLayout(gQueues);
+        verticalLayout_Queues->setObjectName("verticalLayout_Queues");
+        lblTitleQ0 = new QLabel(gQueues);
+        lblTitleQ0->setObjectName("lblTitleQ0");
+
+        verticalLayout_Queues->addWidget(lblTitleQ0);
+
+        lblQueue0 = new QLabel(gQueues);
+        lblQueue0->setObjectName("lblQueue0");
+
+        verticalLayout_Queues->addWidget(lblQueue0);
+
+        lblTitleQ1 = new QLabel(gQueues);
+        lblTitleQ1->setObjectName("lblTitleQ1");
+
+        verticalLayout_Queues->addWidget(lblTitleQ1);
+
+        lblQueue1 = new QLabel(gQueues);
+        lblQueue1->setObjectName("lblQueue1");
+
+        verticalLayout_Queues->addWidget(lblQueue1);
+
+        lblTitleQ2 = new QLabel(gQueues);
+        lblTitleQ2->setObjectName("lblTitleQ2");
+
+        verticalLayout_Queues->addWidget(lblTitleQ2);
+
+        lblQueue2 = new QLabel(gQueues);
+        lblQueue2->setObjectName("lblQueue2");
+
+        verticalLayout_Queues->addWidget(lblQueue2);
+
+
+        verticalLayout_Monitores->addWidget(gQueues);
+
+        gParametros = new QGroupBox(tabSimulacion);
+        gParametros->setObjectName("gParametros");
+        verticalLayout_Params = new QVBoxLayout(gParametros);
+        verticalLayout_Params->setObjectName("verticalLayout_Params");
+        lblVelocidadCinta = new QLabel(gParametros);
+        lblVelocidadCinta->setObjectName("lblVelocidadCinta");
+
+        verticalLayout_Params->addWidget(lblVelocidadCinta);
+
+        lblTiempoS0 = new QLabel(gParametros);
+        lblTiempoS0->setObjectName("lblTiempoS0");
+
+        verticalLayout_Params->addWidget(lblTiempoS0);
+
+        lblTiempoS1 = new QLabel(gParametros);
+        lblTiempoS1->setObjectName("lblTiempoS1");
+
+        verticalLayout_Params->addWidget(lblTiempoS1);
+
+        lblTiempoS2 = new QLabel(gParametros);
+        lblTiempoS2->setObjectName("lblTiempoS2");
+
+        verticalLayout_Params->addWidget(lblTiempoS2);
+
+
+        verticalLayout_Monitores->addWidget(gParametros);
+
+        verticalSpacer_Monitores = new QSpacerItem(20, 40, QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Expanding);
+
+        verticalLayout_Monitores->addItem(verticalSpacer_Monitores);
+
+
+        horizontalLayout_TabSim->addLayout(verticalLayout_Monitores);
 
         tabWidget->addTab(tabSimulacion, QString());
         tabAvanzado = new QWidget();
@@ -424,7 +559,7 @@ public:
 
         retranslateUi(MainWindow);
 
-        tabWidget->setCurrentIndex(1);
+        tabWidget->setCurrentIndex(0);
 
 
         QMetaObject::connectSlotsByName(MainWindow);
@@ -440,6 +575,7 @@ public:
         btnStart->setText(QCoreApplication::translate("MainWindow", "START", nullptr));
         btnStop->setText(QCoreApplication::translate("MainWindow", "STOP", nullptr));
         btnReset->setText(QCoreApplication::translate("MainWindow", "RESET", nullptr));
+        chkTimeMode->setText(QCoreApplication::translate("MainWindow", "Modo Tiempo", nullptr));
         txtLog->setPlaceholderText(QCoreApplication::translate("MainWindow", ">_ Monitor General UART...", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tabPrincipal), QCoreApplication::translate("MainWindow", "Principal", nullptr));
         lblCaja->setText(QCoreApplication::translate("MainWindow", "Caja (cm):", nullptr));
@@ -472,6 +608,18 @@ public:
         btnSimIr1->setText(QCoreApplication::translate("MainWindow", "Activar IR1", nullptr));
         btnSimIr2->setText(QCoreApplication::translate("MainWindow", "Activar IR2", nullptr));
         txtLogMicro->setPlaceholderText(QCoreApplication::translate("MainWindow", ">_ Monitor de Eventos Simulados y Retornos del Micro...", nullptr));
+        gQueues->setTitle(QCoreApplication::translate("MainWindow", "Zonas de Clasificaci\303\263n", nullptr));
+        lblTitleQ0->setText(QCoreApplication::translate("MainWindow", "Ir0 - Ir1", nullptr));
+        lblQueue0->setText(QCoreApplication::translate("MainWindow", "Q0: [0 0 0 0 0 0 0 0 0 0]", nullptr));
+        lblTitleQ1->setText(QCoreApplication::translate("MainWindow", "Ir1 - Ir2", nullptr));
+        lblQueue1->setText(QCoreApplication::translate("MainWindow", "Q1: [0 0 0 0 0 0 0 0 0 0]", nullptr));
+        lblTitleQ2->setText(QCoreApplication::translate("MainWindow", "Ir2 - Ir3", nullptr));
+        lblQueue2->setText(QCoreApplication::translate("MainWindow", "Q2: [0 0 0 0 0 0 0 0 0 0]", nullptr));
+        gParametros->setTitle(QCoreApplication::translate("MainWindow", "Cinem\303\241tica (Modo Tiempo)", nullptr));
+        lblVelocidadCinta->setText(QCoreApplication::translate("MainWindow", "Velocidad de la cinta: -- cm/s", nullptr));
+        lblTiempoS0->setText(QCoreApplication::translate("MainWindow", "Tiempo Servo0: -- ms", nullptr));
+        lblTiempoS1->setText(QCoreApplication::translate("MainWindow", "Tiempo Servo1: -- ms", nullptr));
+        lblTiempoS2->setText(QCoreApplication::translate("MainWindow", "Tiempo Servo2: -- ms", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tabSimulacion), QCoreApplication::translate("MainWindow", "Inyecci\303\263n Manual", nullptr));
         lblProximamente->setText(QCoreApplication::translate("MainWindow", "Espacio para futuras configuraciones...", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tabAvanzado), QCoreApplication::translate("MainWindow", "Avanzado", nullptr));

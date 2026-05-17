@@ -8,6 +8,12 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    ui->lblTiempoS0->hide();
+    ui->lblTiempoS1->hide();
+    ui->lblTiempoS2->hide();
+
+
     serial = new QSerialPort(this);
 
     // Configuración inicial UART
@@ -100,8 +106,7 @@ void MainWindow::procesarComandoMicro(uint8_t cmd, QByteArray payload) {
         break;
 
     case 0x53: // Reset
-        setEstado(Desconectado);
-        ui->btnConectar->setEnabled(true);
+        setEstado(Listo); // CAMBIO CLAVE: Antes decía Desconectado
         ui->txtLog->append(">> Micro: ACK (0x53) - Memoria borrada y hardware reiniciado.");
         break;
 
@@ -114,15 +119,46 @@ void MainWindow::procesarComandoMicro(uint8_t cmd, QByteArray payload) {
         ui->txtLog->append("!! Micro: ERROR (0x5A) - Intento de arranque rechazado. No se ha asignado configuración a las salidas.");
         break;
 
-    case 0x70: { // 2. CORRECCIÓN: Llaves agregadas para aislar la memoria de 'texto'
+    case 0x70: {
         QString texto = QString::fromLatin1(payload);
-        ui->txtLogMicro->append("INFO: " + texto);
-        break;
-    } // <-- Fin de las llaves
 
-    case 0x5F: // 3. CORRECCIÓN: Unificamos el caso 0x5F para evitar duplicados
-        // Leemos el payload para saber qué tamaño de caja es (ej: 6, 8 o 10)
-        ui->txtLog->append(">> Micro: Evento (0x5F) - Caja física de " + QString::number(payload[0]) + "cm detectada.");
+        ui->txtLogMicro->append("INFO: " + texto);
+
+        actualizarQueues(texto);
+
+        break;
+    }
+
+    case 0x58: // Cinemática del Modo Tiempo (Velocidad + Tipo de Caja + FIFOs)
+        if(payload.size() >= 5) {
+            quint8 velocidad = static_cast<quint8>(payload[0]);
+            quint8 tipoCaja  = static_cast<quint8>(payload[1]);
+            quint8 countS0   = static_cast<quint8>(payload[2]);
+            quint8 countS1   = static_cast<quint8>(payload[3]);
+            quint8 countS2   = static_cast<quint8>(payload[4]);
+
+            // 1. Loggeamos el evento (Mensaje genérico porque llega al entrar y al patear)
+            ui->txtLogMicro->append(">> Micro: Cinemática (0x58) - Actualizando FIFOs y Velocidad.");
+
+            // 2. Actualizamos la etiqueta de Velocidad
+            ui->lblVelocidadCinta->setText("Velocidad de la cinta: " + QString::number(velocidad) + " cm/s");
+
+            // 3. Generador rápido para dibujar la cola de patadas (Máximo 5 elementos)
+            auto generarVistaCola = [](quint8 count) -> QString {
+                QString vista = "[ ";
+                for(int i = 0; i < 5; i++) {
+                    if(i < count) vista += "X "; // Caja en vuelo agendada
+                    else vista += "- ";          // Espacio libre en la FIFO
+                }
+                vista += "]";
+                return vista;
+            };
+
+            // 4. Actualizamos visualmente los labels de las Zonas (que en Modo Tiempo son las FIFOs)
+            ui->lblQueue0->setText("S0: " + generarVistaCola(countS0));
+            ui->lblQueue1->setText("S1: " + generarVistaCola(countS1));
+            ui->lblQueue2->setText("S2: " + generarVistaCola(countS2));
+        }
         break;
     case 0x55:
         if(payload.size() >= 2) {
@@ -136,6 +172,29 @@ void MainWindow::procesarComandoMicro(uint8_t cmd, QByteArray payload) {
             // Desenmascarado seguro usando quint8
             uint16_t tiempoWaitConfirmado = static_cast<quint8>(payload[0]) | (static_cast<quint8>(payload[1]) << 8);
             ui->txtLogMicro->append(">> Micro: ACK (0x57) - Tiempo de espera de medición configurado en " + QString::number(tiempoWaitConfirmado) + " ms.");
+        }
+        break;
+    case 0x59: // ACK de Cambio de Modo
+        if (payload.size() >= 1) {
+            if (payload[0] == 0x00) {
+                ui->txtLogMicro->append(">> Micro: ACK (0x59) - Cinta operando en MODO TIEMPO (Ignorando IR de zonas).");
+            } else if (payload[0] == 0x01) {
+                ui->txtLogMicro->append(">> Micro: ACK (0x59) - Cinta operando en MODO INFRARROJO (Usando IR de zonas).");
+            }
+        }
+        break;
+    case 0x52: // Confirmación de estado de Actuadores
+        if(payload.size() >= 2) {
+            quint8 mask = static_cast<quint8>(payload[0]);
+            quint8 pos  = static_cast<quint8>(payload[1]);
+
+            for(int i=0; i < 3; i++) {
+                if(mask & (1 << i)) {
+                    if(pos & (1 << i)) {
+                        ui->txtLogMicro->append(">> Micro: Evento (0x52) - Servo S" + QString::number(i) + " PATEANDO caja.");
+                    }
+                }
+            }
         }
         break;
     }
@@ -275,7 +334,6 @@ void MainWindow::on_SendConfigOut_clicked()
         ui->txtLogMicro->append("!! ERROR: Ingrese números válidos en la configuración de salidas.");
     }
 }
-
 
 void MainWindow::on_btnSimIr0_clicked()
 {
@@ -447,3 +505,66 @@ void MainWindow::on_sendWaitCenter_clicked()
     }
 }
 
+void MainWindow::actualizarQueues(const QString &texto)
+{
+    QString linea = texto.trimmed();
+
+    if(linea.startsWith("Q0:")) {
+        ui->lblQueue0->setText(linea);
+    }
+    else if(linea.startsWith("Q1:")) {
+        ui->lblQueue1->setText(linea);
+    }
+    else if(linea.startsWith("Q2:")) {
+        ui->lblQueue2->setText(linea);
+    }
+}
+
+void MainWindow::on_chkTimeMode_checkStateChanged(const Qt::CheckState &arg1)
+{
+    QByteArray payload;
+
+    if(arg1 == Qt::Checked){
+        // Si se marca, pedimos Modo Tiempo (0x00)
+        ui->txtLogMicro->append("SISTEMA: Solicitando cambio a Modo Tiempo (Lazo Abierto)...");
+        payload.append(static_cast<char>(0x00));
+
+        // --- CAMBIO VISUAL PARA MODO TIEMPO ---
+        ui->lblTitleQ0->setText("Queue S0 (Modo Tiempo)");
+        ui->lblTitleQ1->setText("Queue S1 (Modo Tiempo)");
+        ui->lblTitleQ2->setText("Queue S2 (Modo Tiempo)");
+
+        // CONTENIDO DEFAULT: Inicializamos las FIFOs de patadas vacías [ - - - - - ]
+        ui->lblQueue0->setText("S0: [ - - - - - ]");
+        ui->lblQueue1->setText("S1: [ - - - - - ]");
+        ui->lblQueue2->setText("S2: [ - - - - - ]");
+
+        // Mostramos las etiquetas de tiempo de los servos
+        ui->lblTiempoS0->show();
+        ui->lblTiempoS1->show();
+        ui->lblTiempoS2->show();
+
+    } else {
+        // Si se desmarca, pedimos Modo Infrarrojo (0x01)
+        ui->txtLogMicro->append("SISTEMA: Solicitando cambio a Modo Infrarrojo (Lazo Cerrado)...");
+        payload.append(static_cast<char>(0x01));
+
+        // --- RESTAURAR VISUAL PARA MODO INFRARROJO ---
+        ui->lblTitleQ0->setText("Ir0 - Ir1");
+        ui->lblTitleQ1->setText("Ir1 - Ir2");
+        ui->lblTitleQ2->setText("Ir2 - Ir3");
+
+        // CONTENIDO DEFAULT: Restauramos el formato de matriz de 10 ceros para Modo IR
+        ui->lblQueue0->setText("Q0: [0 0 0 0 0 0 0 0 0 0]");
+        ui->lblQueue1->setText("Q1: [0 0 0 0 0 0 0 0 0 0]");
+        ui->lblQueue2->setText("Q2: [0 0 0 0 0 0 0 0 0 0]");
+
+        // Ocultamos las etiquetas de tiempo de los servos
+        ui->lblTiempoS0->hide();
+        ui->lblTiempoS1->hide();
+        ui->lblTiempoS2->hide();
+    }
+
+    // Usamos el comando 0x59 para el cambio de modo
+    enviarComando(0x59, payload);
+}

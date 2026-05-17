@@ -35,6 +35,8 @@ private slots:
     void on_btnSimServo2_clicked();
     QString formatearAscii(const QByteArray &datos);
     void procesarComandoMicro(uint8_t cmd, QByteArray payload);
+    void on_chkTimeMode_checkStateChanged(const Qt::CheckState &arg1);
+
 
     void on_sendVel_clicked();
 
@@ -44,6 +46,7 @@ private slots:
 
     void on_sendWaitCenter_clicked();
 
+    void actualizarQueues(const QString &texto);
 private:
     Ui::MainWindow *ui;
     QSerialPort *serial;
