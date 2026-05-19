@@ -26,6 +26,19 @@ MainWindow::MainWindow(QWidget *parent)
     connect(serial, &QSerialPort::readyRead, this, &MainWindow::readSerial);
 
     setEstado(Desconectado);
+
+    // Inicializar tiempos en 0
+    timeS0 = 0;
+    timeS1 = 0;
+    timeS2 = 0;
+
+    // Crear el cronómetro y conectarlo a nuestra función
+    timerCountdown = new QTimer(this);
+    connect(timerCountdown, &QTimer::timeout, this, &MainWindow::updateCountdowns);
+
+    // Lo configuramos para que "tickee" cada 50ms (20 FPS) para que se vea bien fluido
+    timerCountdown->start(50);
+
 }
 
 MainWindow::~MainWindow() {
@@ -85,7 +98,9 @@ void MainWindow::procesarComandoMicro(uint8_t cmd, QByteArray payload) {
         }
         ui->txtLog->append(">> Micro: ACK (0xF0) - Sistema en línea y conectado.");
         break;
-
+    case 0x64: // ACK de Factor de Corrección
+        ui->txtLogMicro->append(">> Micro: ACK (0x64) - Factor cinemático actualizado en memoria.");
+        break;
     case 0x40: // Configuración OK
         if (payload.size() >= 3) {
             // Desenmascarado seguro forzando a entero de 8 bits (quint8)
@@ -121,11 +136,32 @@ void MainWindow::procesarComandoMicro(uint8_t cmd, QByteArray payload) {
 
     case 0x70: {
         QString texto = QString::fromLatin1(payload);
-
         ui->txtLogMicro->append("INFO: " + texto);
-
         actualizarQueues(texto);
 
+        // --- CAZADOR REGEX 1: Atrapa el tiempo agendado ---
+        QRegularExpression regexAgendado("TIMEMODE: S(\\d) Agendado\\. T\\.Vuelo: (\\d+) ms");
+        QRegularExpressionMatch matchA = regexAgendado.match(texto);
+
+        if (matchA.hasMatch()) {
+            int servo = matchA.captured(1).toInt();   // Atrapa el número de servo (0, 1 o 2)
+            int tVuelo = matchA.captured(2).toInt();  // Atrapa los milisegundos
+
+            if (servo == 0) timeS0 = tVuelo;
+            else if (servo == 1) timeS1 = tVuelo;
+            else if (servo == 2) timeS2 = tVuelo;
+        }
+
+        // --- CAZADOR REGEX 2: Resetea el tiempo cuando patea ---
+        QRegularExpression regexPateo("TIMEMODE: S(\\d) PATEO!");
+        QRegularExpressionMatch matchP = regexPateo.match(texto);
+
+        if (matchP.hasMatch()) {
+            int servo = matchP.captured(1).toInt();
+            if (servo == 0) timeS0 = 0;
+            else if (servo == 1) timeS1 = 0;
+            else if (servo == 2) timeS2 = 0;
+        }
         break;
     }
 
@@ -219,6 +255,13 @@ void MainWindow::procesarComandoMicro(uint8_t cmd, QByteArray payload) {
     case 0x62: // ACK de Calibración de Tiempos de Servo
         ui->txtLogMicro->append(">> Micro: ACK (0x62) - Tiempos del actuador actualizados en memoria.");
         break;
+
+    case 0x63:{ // Respuesta de Medición Manual del Ultrasónico
+        if (payload.size() >= 2) {
+            quint8 distanciaCm = static_cast<quint8>(payload[1]);
+        }
+    }break;
+
     }
 }
 // --- SLOTS (INTERFAZ) ---
@@ -280,12 +323,12 @@ void MainWindow::readSerial() {
     ui->txtLog->append("RX <- " + bufferIn.toHex(' ').toUpper());
 
     // 2. Traducir a ASCII y mostrarlo en el Log del Micro
-    QString textoTraducido = formatearAscii(bufferIn);
+    /*QString textoTraducido = formatearAscii(bufferIn);*/
 
     // Solo imprimimos si el texto tiene algo más que puros puntos vacíos
-    if (!textoTraducido.trimmed().isEmpty() && textoTraducido.contains(QRegularExpression("[A-Za-z0-9]"))) {
+    /*if (!textoTraducido.trimmed().isEmpty() && textoTraducido.contains(QRegularExpression("[A-Za-z0-9]"))) {
         ui->txtLogMicro->append("DEBUG: " + textoTraducido.trimmed());
-    }
+    }*/
 
     static QByteArray tramaBuffer;
     tramaBuffer.append(bufferIn);
@@ -404,11 +447,13 @@ void MainWindow::on_btnStop_clicked() {
 }
 
 void MainWindow::on_btnReset_clicked() {
+    // 1. Enviamos el comando al Microcontrolador
     enviarComando(0x53, QByteArray());
-    // NO cambiamos a Gris acá, esperamos el ACK 0x53
     ui->txtLog->append("SISTEMA: Solicitando Reset Integral...");
-}
 
+    // 2. Ejecutamos el reset visual de Qt
+    resetUI();
+}
 void MainWindow::on_btnSimServo0_clicked()
 {
     QByteArray payload;
@@ -551,6 +596,14 @@ void MainWindow::on_chkTimeMode_checkStateChanged(const Qt::CheckState &arg1)
         ui->txtLogMicro->append("SISTEMA: Solicitando cambio a Modo Tiempo (Lazo Abierto)...");
         payload.append(static_cast<char>(0x00));
 
+        // --- BLOQUEO DE CONTROLES MANUALES ---
+        ui->btnSimServo0->setEnabled(false);
+        ui->btnSimServo1->setEnabled(false);
+        ui->btnSimServo2->setEnabled(false);
+        ui->btnSimIr0->setEnabled(false);
+        ui->btnSimIr1->setEnabled(false);
+        ui->btnSimIr2->setEnabled(false);
+
         // --- CAMBIO VISUAL PARA MODO TIEMPO ---
         ui->lblTitleQ0->setText("Queue S0 (Modo Tiempo)");
         ui->lblTitleQ1->setText("Queue S1 (Modo Tiempo)");
@@ -571,12 +624,20 @@ void MainWindow::on_chkTimeMode_checkStateChanged(const Qt::CheckState &arg1)
         ui->txtLogMicro->append("SISTEMA: Solicitando cambio a Modo Infrarrojo (Lazo Cerrado)...");
         payload.append(static_cast<char>(0x01));
 
+        // --- LIBERACIÓN DE CONTROLES MANUALES ---
+        ui->btnSimServo0->setEnabled(true);
+        ui->btnSimServo1->setEnabled(true);
+        ui->btnSimServo2->setEnabled(true);
+        ui->btnSimIr0->setEnabled(true);
+        ui->btnSimIr1->setEnabled(true);
+        ui->btnSimIr2->setEnabled(true);
+
         // --- RESTAURAR VISUAL PARA MODO INFRARROJO ---
         ui->lblTitleQ0->setText("Ir0 - Ir1");
         ui->lblTitleQ1->setText("Ir1 - Ir2");
         ui->lblTitleQ2->setText("Ir2 - Ir3");
 
-        // CONTENIDO DEFAULT: Restauramos el formato de matriz de 10 ceros para Modo IR
+        // CONTENIDO DEFAULT: Restauramos el formato de matriz de 10 ceros
         ui->lblQueue0->setText("Q0: [0 0 0 0 0 0 0 0 0 0]");
         ui->lblQueue1->setText("Q1: [0 0 0 0 0 0 0 0 0 0]");
         ui->lblQueue2->setText("Q2: [0 0 0 0 0 0 0 0 0 0]");
@@ -658,5 +719,89 @@ void MainWindow::on_btnEnviarTiempos_clicked()
     } else {
         // Si escribieron letras o lo dejaron en blanco, tiramos error en el Log
         ui->txtLogMicro->append("!! ERROR: Ingrese valores numéricos válidos para los tiempos del actuador.");
+    }
+}
+
+
+void MainWindow::on_btnMedir_clicked()
+{
+    enviarComando(0x63, QByteArray());
+}
+
+
+void MainWindow::updateCountdowns() {
+    // Para el Servo 0
+    if (timeS0 > 0) {
+        timeS0 -= 50; // Restamos los 50ms del tick
+        if (timeS0 < 0) timeS0 = 0;
+        ui->lblTiempoS0->setText("Tiempo Servo0: " + QString::number(timeS0) + " ms");
+    } else {
+        ui->lblTiempoS0->setText("Tiempo Servo0: -- ms");
+    }
+
+    // Para el Servo 1
+    if (timeS1 > 0) {
+        timeS1 -= 50;
+        if (timeS1 < 0) timeS1 = 0;
+        ui->lblTiempoS1->setText("Tiempo Servo1: " + QString::number(timeS1) + " ms");
+    } else {
+        ui->lblTiempoS1->setText("Tiempo Servo1: -- ms");
+    }
+
+    // Para el Servo 2
+    if (timeS2 > 0) {
+        timeS2 -= 50;
+        if (timeS2 < 0) timeS2 = 0;
+        ui->lblTiempoS2->setText("Tiempo Servo2: " + QString::number(timeS2) + " ms");
+    } else {
+        ui->lblTiempoS2->setText("Tiempo Servo2: -- ms");
+    }
+}
+
+
+void MainWindow::resetUI() {
+    // 1. Limpiar logs
+    ui->txtLog->clear();
+    ui->txtLogMicro->clear();
+
+    // 2. Resetear variables de tiempo
+    timeS0 = 0;
+    timeS1 = 0;
+    timeS2 = 0;
+
+    // 3. Resetear Etiquetas de Colas
+    ui->lblQueue0->setText("Q0: [0 0 0 0 0 0 0 0 0 0]");
+    ui->lblQueue1->setText("Q1: [0 0 0 0 0 0 0 0 0 0]");
+    ui->lblQueue2->setText("Q2: [0 0 0 0 0 0 0 0 0 0]");
+
+    // 4. Resetear etiquetas de Cinemática
+    ui->lblVelocidadCinta->setText("Velocidad de la cinta: -- cm/s");
+    ui->lblTiempoS0->setText("Tiempo Servo0: -- ms");
+    ui->lblTiempoS1->setText("Tiempo Servo1: -- ms");
+    ui->lblTiempoS2->setText("Tiempo Servo2: -- ms");
+
+    // 5. Opcional: Volver al estado "Listo" visualmente
+    setEstado(Listo);
+}
+
+void MainWindow::on_btnEnviarFactor_clicked()
+{
+    bool ok;
+    // Reemplazamos coma por punto para evitar errores de parseo
+    QString textoFactor = ui->txtFactor->text().replace(",", ".");
+    float factor = textoFactor.toFloat(&ok);
+
+    if (ok && factor > 0) {
+        // Convertimos el float a un entero x100 (ej. 1.33 -> 133)
+        uint16_t factorInt = static_cast<uint16_t>(factor * 100);
+
+        QByteArray payload;
+        payload.append(static_cast<char>(factorInt & 0xFF));         // Byte Bajo
+        payload.append(static_cast<char>((factorInt >> 8) & 0xFF));  // Byte Alto
+
+        enviarComando(0x64, payload);
+        ui->txtLogMicro->append("SISTEMA: Enviando factor de corrección (" + QString::number(factor) + ")...");
+    } else {
+        ui->txtLogMicro->append("!! ERROR: Ingrese un factor numérico válido y mayor a 0.");
     }
 }

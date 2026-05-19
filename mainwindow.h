@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QSerialPort>
+#include <QTimer>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -37,19 +38,16 @@ private slots:
     void procesarComandoMicro(uint8_t cmd, QByteArray payload);
     void on_chkTimeMode_checkStateChanged(const Qt::CheckState &arg1);
     void on_btnEnviarTiempos_clicked();
-
-
     void on_sendVel_clicked();
-
     void on_sendTimeout_clicked();
-
     void on_checkBox_checkStateChanged(const Qt::CheckState &arg1);
-
     void on_sendWaitCenter_clicked();
-
     void actualizarQueues(const QString &texto);
     void on_btnEnviarCalibracion_clicked();
-
+    void on_btnMedir_clicked();
+    void updateCountdowns();
+    void resetUI();
+    void on_btnEnviarFactor_clicked();
 private:
     Ui::MainWindow *ui;
     QSerialPort *serial;
@@ -57,5 +55,10 @@ private:
     void setEstado(State nuevoEstado);
     void enviarComando(uint8_t cmd, QByteArray payload = QByteArray());
     void procesarComandoMicro(uint8_t cmd);
+
+    QTimer *timerCountdown;
+    int timeS0, timeS1, timeS2; // Tiempos restantes en milisegundos
+
+
 };
 #endif

@@ -68,7 +68,11 @@ template <> constexpr inline auto MainWindow::qt_create_metaobjectdata<qt_meta_t
         "on_sendWaitCenter_clicked",
         "actualizarQueues",
         "texto",
-        "on_btnEnviarCalibracion_clicked"
+        "on_btnEnviarCalibracion_clicked",
+        "on_btnMedir_clicked",
+        "updateCountdowns",
+        "resetUI",
+        "on_btnEnviarFactor_clicked"
     };
 
     QtMocHelpers::UintData qt_methods {
@@ -126,6 +130,14 @@ template <> constexpr inline auto MainWindow::qt_create_metaobjectdata<qt_meta_t
         }}),
         // Slot 'on_btnEnviarCalibracion_clicked'
         QtMocHelpers::SlotData<void()>(30, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'on_btnMedir_clicked'
+        QtMocHelpers::SlotData<void()>(31, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'updateCountdowns'
+        QtMocHelpers::SlotData<void()>(32, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'resetUI'
+        QtMocHelpers::SlotData<void()>(33, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'on_btnEnviarFactor_clicked'
+        QtMocHelpers::SlotData<void()>(34, 2, QMC::AccessPrivate, QMetaType::Void),
     };
     QtMocHelpers::UintData qt_properties {
     };
@@ -172,6 +184,10 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 19: _t->on_sendWaitCenter_clicked(); break;
         case 20: _t->actualizarQueues((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1]))); break;
         case 21: _t->on_btnEnviarCalibracion_clicked(); break;
+        case 22: _t->on_btnMedir_clicked(); break;
+        case 23: _t->updateCountdowns(); break;
+        case 24: _t->resetUI(); break;
+        case 25: _t->on_btnEnviarFactor_clicked(); break;
         default: ;
         }
     }
@@ -196,14 +212,14 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 22)
+        if (_id < 26)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 22;
+        _id -= 26;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 22)
+        if (_id < 26)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 22;
+        _id -= 26;
     }
     return _id;
 }

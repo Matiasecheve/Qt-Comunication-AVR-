@@ -81,6 +81,7 @@ public:
     QLabel *lblTextWaitCenter;
     QLineEdit *textWaitCenter;
     QPushButton *sendWaitCenter;
+    QPushButton *btnMedir;
     QSpacerItem *horizontalSpacer_wait_center;
     QHBoxLayout *horizontalLayout_hardware;
     QGroupBox *gServos;
@@ -133,6 +134,11 @@ public:
     QLabel *lblDelay;
     QLineEdit *txtDelayMs;
     QPushButton *btnEnviarTiempos;
+    QGroupBox *gCorreccion;
+    QHBoxLayout *horizontalLayout_factor;
+    QLabel *lblFactor;
+    QLineEdit *txtFactor;
+    QPushButton *btnEnviarFactor;
     QSpacerItem *verticalSpacer_tab3;
 
     void setupUi(QMainWindow *MainWindow)
@@ -424,6 +430,12 @@ public:
 
         horizontalLayout_wait_center->addWidget(sendWaitCenter);
 
+        btnMedir = new QPushButton(gWaitCenter);
+        btnMedir->setObjectName("btnMedir");
+        btnMedir->setStyleSheet(QString::fromUtf8("background-color: #f0ad4e; color: #1e1e1e;"));
+
+        horizontalLayout_wait_center->addWidget(btnMedir);
+
         horizontalSpacer_wait_center = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
 
         horizontalLayout_wait_center->addItem(horizontalSpacer_wait_center);
@@ -678,6 +690,30 @@ public:
 
         verticalLayout_tab3->addWidget(btnEnviarTiempos);
 
+        gCorreccion = new QGroupBox(tabAvanzado);
+        gCorreccion->setObjectName("gCorreccion");
+        horizontalLayout_factor = new QHBoxLayout(gCorreccion);
+        horizontalLayout_factor->setObjectName("horizontalLayout_factor");
+        lblFactor = new QLabel(gCorreccion);
+        lblFactor->setObjectName("lblFactor");
+
+        horizontalLayout_factor->addWidget(lblFactor);
+
+        txtFactor = new QLineEdit(gCorreccion);
+        txtFactor->setObjectName("txtFactor");
+        txtFactor->setAlignment(Qt::AlignmentFlag::AlignCenter);
+
+        horizontalLayout_factor->addWidget(txtFactor);
+
+        btnEnviarFactor = new QPushButton(gCorreccion);
+        btnEnviarFactor->setObjectName("btnEnviarFactor");
+        btnEnviarFactor->setStyleSheet(QString::fromUtf8("background-color: #5bc0de; color: #1e1e1e; font-weight: bold;"));
+
+        horizontalLayout_factor->addWidget(btnEnviarFactor);
+
+
+        verticalLayout_tab3->addWidget(gCorreccion);
+
         verticalSpacer_tab3 = new QSpacerItem(20, 40, QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Expanding);
 
         verticalLayout_tab3->addItem(verticalSpacer_tab3);
@@ -730,6 +766,7 @@ public:
         lblTextWaitCenter->setText(QCoreApplication::translate("MainWindow", "Tiempo (ms):", nullptr));
         textWaitCenter->setText(QCoreApplication::translate("MainWindow", "200", nullptr));
         sendWaitCenter->setText(QCoreApplication::translate("MainWindow", "Enviar Retardo", nullptr));
+        btnMedir->setText(QCoreApplication::translate("MainWindow", "Medir", nullptr));
         gServos->setTitle(QCoreApplication::translate("MainWindow", "Pateadores (Servos)", nullptr));
         btnSimServo0->setText(QCoreApplication::translate("MainWindow", "Patear S0", nullptr));
         btnSimServo1->setText(QCoreApplication::translate("MainWindow", "Patear S1", nullptr));
@@ -771,6 +808,10 @@ public:
         lblDelay->setText(QCoreApplication::translate("MainWindow", "Tiempo Retracci\303\263n / ACT_DELAY (ms):", nullptr));
         txtDelayMs->setText(QCoreApplication::translate("MainWindow", "100", nullptr));
         btnEnviarTiempos->setText(QCoreApplication::translate("MainWindow", "Enviar Tiempos (CMD 0x62)", nullptr));
+        gCorreccion->setTitle(QCoreApplication::translate("MainWindow", "Correcci\303\263n Cinem\303\241tica (Factor Multiplicador)", nullptr));
+        lblFactor->setText(QCoreApplication::translate("MainWindow", "Factor (ej. 1.33):", nullptr));
+        txtFactor->setText(QCoreApplication::translate("MainWindow", "1.33", nullptr));
+        btnEnviarFactor->setText(QCoreApplication::translate("MainWindow", "Enviar Factor (CMD 0x64)", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tabAvanzado), QCoreApplication::translate("MainWindow", "Calibraci\303\263n", nullptr));
     } // retranslateUi
 
