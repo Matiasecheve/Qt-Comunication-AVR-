@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>850</width>
+    <width>929</width>
     <height>630</height>
    </rect>
   </property>
@@ -87,7 +87,7 @@ QLabel#lblTiempoS2 { color: #33cc33; border: 1px solid #33cc33; } /* Verde */
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tabPrincipal">
        <attribute name="title">
@@ -632,18 +632,194 @@ QLabel#lblTiempoS2 { color: #33cc33; border: 1px solid #33cc33; } /* Verde */
       </widget>
       <widget class="QWidget" name="tabAvanzado">
        <attribute name="title">
-        <string>Avanzado</string>
+        <string>Calibración</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_tab3">
         <item>
-         <widget class="QLabel" name="lblProximamente">
-          <property name="text">
-           <string>Espacio para futuras configuraciones...</string>
+         <widget class="QGroupBox" name="gCalibracion">
+          <property name="title">
+           <string>Calibración de Tolerancias del Sensor Ultrasónico</string>
           </property>
-          <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignCenter</set>
+          <layout class="QGridLayout" name="gridLayout_calibracion">
+           <item row="0" column="1">
+            <widget class="QLabel" name="lblMin">
+             <property name="text">
+              <string>Mínimo (cm)</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QLabel" name="lblMax">
+             <property name="text">
+              <string>Máximo (cm)</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="lblCaja6">
+             <property name="text">
+              <string>Caja Pequeña (6cm):</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QLineEdit" name="txtMin6">
+             <property name="text">
+              <string>9</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QLineEdit" name="txtMax6">
+             <property name="text">
+              <string>11</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="lblCaja8">
+             <property name="text">
+              <string>Caja Mediana (8cm):</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QLineEdit" name="txtMin8">
+             <property name="text">
+              <string>6</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="2">
+            <widget class="QLineEdit" name="txtMax8">
+             <property name="text">
+              <string>8</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="lblCaja10">
+             <property name="text">
+              <string>Caja Grande (10cm):</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QLineEdit" name="txtMin10">
+             <property name="text">
+              <string>4</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="2">
+            <widget class="QLineEdit" name="txtMax10">
+             <property name="text">
+              <string>6</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnEnviarCalibracion">
+          <property name="styleSheet">
+           <string notr="true">background-color: #5bc0de; color: #1e1e1e; padding: 10px; font-size: 14px;</string>
+          </property>
+          <property name="text">
+           <string>Enviar Calibración (CMD 0x60)</string>
           </property>
          </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="gTiemposActuador">
+          <property name="title">
+           <string>Calibración de Tiempos del Actuador (Servos)</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_tiempos">
+           <item row="0" column="0">
+            <widget class="QLabel" name="lblExtend">
+             <property name="text">
+              <string>Tiempo Extensión / ACT_EXTEND (ms):</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="txtExtendMs">
+             <property name="text">
+              <string>300</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="lblDelay">
+             <property name="text">
+              <string>Tiempo Retracción / ACT_DELAY (ms):</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QLineEdit" name="txtDelayMs">
+             <property name="text">
+              <string>100</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnEnviarTiempos">
+          <property name="styleSheet">
+           <string notr="true">background-color: #5bc0de; color: #1e1e1e; padding: 10px; font-size: 14px;</string>
+          </property>
+          <property name="text">
+           <string>Enviar Tiempos (CMD 0x62)</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_tab3">
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
         </item>
        </layout>
       </widget>

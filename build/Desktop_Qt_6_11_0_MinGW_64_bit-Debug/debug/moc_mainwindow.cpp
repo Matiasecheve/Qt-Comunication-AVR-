@@ -61,12 +61,14 @@ template <> constexpr inline auto MainWindow::qt_create_metaobjectdata<qt_meta_t
         "on_chkTimeMode_checkStateChanged",
         "Qt::CheckState",
         "arg1",
+        "on_btnEnviarTiempos_clicked",
         "on_sendVel_clicked",
         "on_sendTimeout_clicked",
         "on_checkBox_checkStateChanged",
         "on_sendWaitCenter_clicked",
         "actualizarQueues",
-        "texto"
+        "texto",
+        "on_btnEnviarCalibracion_clicked"
     };
 
     QtMocHelpers::UintData qt_methods {
@@ -106,20 +108,24 @@ template <> constexpr inline auto MainWindow::qt_create_metaobjectdata<qt_meta_t
         QtMocHelpers::SlotData<void(const Qt::CheckState &)>(20, 2, QMC::AccessPrivate, QMetaType::Void, {{
             { 0x80000000 | 21, 22 },
         }}),
-        // Slot 'on_sendVel_clicked'
+        // Slot 'on_btnEnviarTiempos_clicked'
         QtMocHelpers::SlotData<void()>(23, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'on_sendTimeout_clicked'
+        // Slot 'on_sendVel_clicked'
         QtMocHelpers::SlotData<void()>(24, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'on_sendTimeout_clicked'
+        QtMocHelpers::SlotData<void()>(25, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'on_checkBox_checkStateChanged'
-        QtMocHelpers::SlotData<void(const Qt::CheckState &)>(25, 2, QMC::AccessPrivate, QMetaType::Void, {{
+        QtMocHelpers::SlotData<void(const Qt::CheckState &)>(26, 2, QMC::AccessPrivate, QMetaType::Void, {{
             { 0x80000000 | 21, 22 },
         }}),
         // Slot 'on_sendWaitCenter_clicked'
-        QtMocHelpers::SlotData<void()>(26, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(27, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'actualizarQueues'
-        QtMocHelpers::SlotData<void(const QString &)>(27, 2, QMC::AccessPrivate, QMetaType::Void, {{
-            { QMetaType::QString, 28 },
+        QtMocHelpers::SlotData<void(const QString &)>(28, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { QMetaType::QString, 29 },
         }}),
+        // Slot 'on_btnEnviarCalibracion_clicked'
+        QtMocHelpers::SlotData<void()>(30, 2, QMC::AccessPrivate, QMetaType::Void),
     };
     QtMocHelpers::UintData qt_properties {
     };
@@ -159,11 +165,13 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
             if (_a[0]) *reinterpret_cast<QString*>(_a[0]) = std::move(_r); }  break;
         case 13: _t->procesarComandoMicro((*reinterpret_cast<std::add_pointer_t<uint8_t>>(_a[1])),(*reinterpret_cast<std::add_pointer_t<QByteArray>>(_a[2]))); break;
         case 14: _t->on_chkTimeMode_checkStateChanged((*reinterpret_cast<std::add_pointer_t<Qt::CheckState>>(_a[1]))); break;
-        case 15: _t->on_sendVel_clicked(); break;
-        case 16: _t->on_sendTimeout_clicked(); break;
-        case 17: _t->on_checkBox_checkStateChanged((*reinterpret_cast<std::add_pointer_t<Qt::CheckState>>(_a[1]))); break;
-        case 18: _t->on_sendWaitCenter_clicked(); break;
-        case 19: _t->actualizarQueues((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1]))); break;
+        case 15: _t->on_btnEnviarTiempos_clicked(); break;
+        case 16: _t->on_sendVel_clicked(); break;
+        case 17: _t->on_sendTimeout_clicked(); break;
+        case 18: _t->on_checkBox_checkStateChanged((*reinterpret_cast<std::add_pointer_t<Qt::CheckState>>(_a[1]))); break;
+        case 19: _t->on_sendWaitCenter_clicked(); break;
+        case 20: _t->actualizarQueues((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1]))); break;
+        case 21: _t->on_btnEnviarCalibracion_clicked(); break;
         default: ;
         }
     }
@@ -188,14 +196,14 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 20)
+        if (_id < 22)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 20;
+        _id -= 22;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 20)
+        if (_id < 22)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 20;
+        _id -= 22;
     }
     return _id;
 }

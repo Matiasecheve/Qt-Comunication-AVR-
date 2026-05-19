@@ -36,6 +36,7 @@ private slots:
     QString formatearAscii(const QByteArray &datos);
     void procesarComandoMicro(uint8_t cmd, QByteArray payload);
     void on_chkTimeMode_checkStateChanged(const Qt::CheckState &arg1);
+    void on_btnEnviarTiempos_clicked();
 
 
     void on_sendVel_clicked();
@@ -47,6 +48,8 @@ private slots:
     void on_sendWaitCenter_clicked();
 
     void actualizarQueues(const QString &texto);
+    void on_btnEnviarCalibracion_clicked();
+
 private:
     Ui::MainWindow *ui;
     QSerialPort *serial;

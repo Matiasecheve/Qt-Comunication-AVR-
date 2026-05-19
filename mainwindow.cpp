@@ -197,6 +197,28 @@ void MainWindow::procesarComandoMicro(uint8_t cmd, QByteArray payload) {
             }
         }
         break;
+    case 0x60: // ACK de Calibración de Sensor
+        ui->txtLogMicro->append(">> Micro: ACK (0x60) - Tolerancias del ultrasónico actualizadas correctamente.");
+        break;
+    case 0x56: // ACK de Modo Timeout (Auto/Manual)
+        if (payload.size() >= 1) {
+            if (payload[0] == 0x01) {
+                ui->txtLogMicro->append(">> Micro: ACK (0x56) - Modo de patada cambiado a MANUAL.");
+            } else {
+                ui->txtLogMicro->append(">> Micro: ACK (0x56) - Modo de patada cambiado a AUTOMÁTICO.");
+            }
+        }
+        break;
+    case 0x5F: // Evento: Nueva Caja Detectada
+        if(payload.size() >= 1) {
+            quint8 tipoCaja = static_cast<quint8>(payload[0]);
+            ui->txtLog->append(">> Micro: Evento (0x5F) - Nueva caja clasificada: " + QString::number(tipoCaja) + " cm.");
+        }
+        break;
+
+    case 0x62: // ACK de Calibración de Tiempos de Servo
+        ui->txtLogMicro->append(">> Micro: ACK (0x62) - Tiempos del actuador actualizados en memoria.");
+        break;
     }
 }
 // --- SLOTS (INTERFAZ) ---
@@ -567,4 +589,74 @@ void MainWindow::on_chkTimeMode_checkStateChanged(const Qt::CheckState &arg1)
 
     // Usamos el comando 0x59 para el cambio de modo
     enviarComando(0x59, payload);
+}
+
+
+void MainWindow::on_btnEnviarCalibracion_clicked()
+{
+    bool ok1, ok2, ok3, ok4, ok5, ok6;
+
+    // 1. Leer los valores de las cajas de texto y convertirlos a enteros
+    int min6 = ui->txtMin6->text().toInt(&ok1);
+    int max6 = ui->txtMax6->text().toInt(&ok2);
+
+    int min8 = ui->txtMin8->text().toInt(&ok3);
+    int max8 = ui->txtMax8->text().toInt(&ok4);
+
+    int min10 = ui->txtMin10->text().toInt(&ok5);
+    int max10 = ui->txtMax10->text().toInt(&ok6);
+
+    // 2. Verificar que el usuario no haya escrito letras o dejado vacíos
+    if (ok1 && ok2 && ok3 && ok4 && ok5 && ok6) {
+
+        QByteArray payload;
+
+        // 3. Empaquetar los 6 bytes (El orden es vital para que el micro los entienda)
+        // Orden: [Min6][Max6][Min8][Max8][Min10][Max10]
+        payload.append(static_cast<char>(min6));
+        payload.append(static_cast<char>(max6));
+        payload.append(static_cast<char>(min8));
+        payload.append(static_cast<char>(max8));
+        payload.append(static_cast<char>(min10));
+        payload.append(static_cast<char>(max10));
+
+        // 4. Enviar el comando 0x60
+        enviarComando(0x60, payload);
+
+        ui->txtLogMicro->append("SISTEMA: Enviando nueva calibración de tolerancias (CMD 0x60)...");
+
+    } else {
+        ui->txtLogMicro->append("!! ERROR: Verifica que todos los campos de calibración sean números válidos.");
+    }
+}
+
+
+void MainWindow::on_btnEnviarTiempos_clicked()
+{
+    bool ok1, ok2;
+
+    // 1. Leemos los valores de las cajas de texto de la interfaz
+    int extendMs = ui->txtExtendMs->text().toInt(&ok1);
+    int delayMs = ui->txtDelayMs->text().toInt(&ok2);
+
+    // 2. Verificamos que el usuario haya ingresado números válidos
+    if (ok1 && ok2) {
+        QByteArray payload;
+
+        // 3. Empaquetamos el tiempo de Extensión (16 bits -> 2 bytes, Little Endian)
+        payload.append(static_cast<char>(extendMs & 0xFF));         // Byte Bajo
+        payload.append(static_cast<char>((extendMs >> 8) & 0xFF));  // Byte Alto
+
+        // 4. Empaquetamos el tiempo de Retracción/Delay (16 bits -> 2 bytes, Little Endian)
+        payload.append(static_cast<char>(delayMs & 0xFF));          // Byte Bajo
+        payload.append(static_cast<char>((delayMs >> 8) & 0xFF));   // Byte Alto
+
+        // 5. Enviamos la trama completa al microcontrolador con el comando 0x62
+        enviarComando(0x62, payload);
+        ui->txtLogMicro->append("SISTEMA: Enviando calibración de Tiempos del Actuador (CMD 0x62)...");
+
+    } else {
+        // Si escribieron letras o lo dejaron en blanco, tiramos error en el Log
+        ui->txtLogMicro->append("!! ERROR: Ingrese valores numéricos válidos para los tiempos del actuador.");
+    }
 }

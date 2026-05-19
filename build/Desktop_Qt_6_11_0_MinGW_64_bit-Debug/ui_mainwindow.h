@@ -12,6 +12,7 @@
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QCheckBox>
+#include <QtWidgets/QGridLayout>
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QLabel>
@@ -111,13 +112,34 @@ public:
     QSpacerItem *verticalSpacer_Monitores;
     QWidget *tabAvanzado;
     QVBoxLayout *verticalLayout_tab3;
-    QLabel *lblProximamente;
+    QGroupBox *gCalibracion;
+    QGridLayout *gridLayout_calibracion;
+    QLabel *lblMin;
+    QLabel *lblMax;
+    QLabel *lblCaja6;
+    QLineEdit *txtMin6;
+    QLineEdit *txtMax6;
+    QLabel *lblCaja8;
+    QLineEdit *txtMin8;
+    QLineEdit *txtMax8;
+    QLabel *lblCaja10;
+    QLineEdit *txtMin10;
+    QLineEdit *txtMax10;
+    QPushButton *btnEnviarCalibracion;
+    QGroupBox *gTiemposActuador;
+    QGridLayout *gridLayout_tiempos;
+    QLabel *lblExtend;
+    QLineEdit *txtExtendMs;
+    QLabel *lblDelay;
+    QLineEdit *txtDelayMs;
+    QPushButton *btnEnviarTiempos;
+    QSpacerItem *verticalSpacer_tab3;
 
     void setupUi(QMainWindow *MainWindow)
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName("MainWindow");
-        MainWindow->resize(850, 630);
+        MainWindow->resize(929, 630);
         MainWindow->setStyleSheet(QString::fromUtf8("/* Dise\303\261o SCADA / Industrial Dark Mode */\n"
 "QWidget { background-color: #2b2b2b; color: #e0e0e0; font-family: \"Segoe UI\", sans-serif; }\n"
 "\n"
@@ -545,11 +567,120 @@ public:
         tabAvanzado->setObjectName("tabAvanzado");
         verticalLayout_tab3 = new QVBoxLayout(tabAvanzado);
         verticalLayout_tab3->setObjectName("verticalLayout_tab3");
-        lblProximamente = new QLabel(tabAvanzado);
-        lblProximamente->setObjectName("lblProximamente");
-        lblProximamente->setAlignment(Qt::AlignmentFlag::AlignCenter);
+        gCalibracion = new QGroupBox(tabAvanzado);
+        gCalibracion->setObjectName("gCalibracion");
+        gridLayout_calibracion = new QGridLayout(gCalibracion);
+        gridLayout_calibracion->setObjectName("gridLayout_calibracion");
+        lblMin = new QLabel(gCalibracion);
+        lblMin->setObjectName("lblMin");
+        lblMin->setAlignment(Qt::AlignmentFlag::AlignCenter);
 
-        verticalLayout_tab3->addWidget(lblProximamente);
+        gridLayout_calibracion->addWidget(lblMin, 0, 1, 1, 1);
+
+        lblMax = new QLabel(gCalibracion);
+        lblMax->setObjectName("lblMax");
+        lblMax->setAlignment(Qt::AlignmentFlag::AlignCenter);
+
+        gridLayout_calibracion->addWidget(lblMax, 0, 2, 1, 1);
+
+        lblCaja6 = new QLabel(gCalibracion);
+        lblCaja6->setObjectName("lblCaja6");
+
+        gridLayout_calibracion->addWidget(lblCaja6, 1, 0, 1, 1);
+
+        txtMin6 = new QLineEdit(gCalibracion);
+        txtMin6->setObjectName("txtMin6");
+        txtMin6->setAlignment(Qt::AlignmentFlag::AlignCenter);
+
+        gridLayout_calibracion->addWidget(txtMin6, 1, 1, 1, 1);
+
+        txtMax6 = new QLineEdit(gCalibracion);
+        txtMax6->setObjectName("txtMax6");
+        txtMax6->setAlignment(Qt::AlignmentFlag::AlignCenter);
+
+        gridLayout_calibracion->addWidget(txtMax6, 1, 2, 1, 1);
+
+        lblCaja8 = new QLabel(gCalibracion);
+        lblCaja8->setObjectName("lblCaja8");
+
+        gridLayout_calibracion->addWidget(lblCaja8, 2, 0, 1, 1);
+
+        txtMin8 = new QLineEdit(gCalibracion);
+        txtMin8->setObjectName("txtMin8");
+        txtMin8->setAlignment(Qt::AlignmentFlag::AlignCenter);
+
+        gridLayout_calibracion->addWidget(txtMin8, 2, 1, 1, 1);
+
+        txtMax8 = new QLineEdit(gCalibracion);
+        txtMax8->setObjectName("txtMax8");
+        txtMax8->setAlignment(Qt::AlignmentFlag::AlignCenter);
+
+        gridLayout_calibracion->addWidget(txtMax8, 2, 2, 1, 1);
+
+        lblCaja10 = new QLabel(gCalibracion);
+        lblCaja10->setObjectName("lblCaja10");
+
+        gridLayout_calibracion->addWidget(lblCaja10, 3, 0, 1, 1);
+
+        txtMin10 = new QLineEdit(gCalibracion);
+        txtMin10->setObjectName("txtMin10");
+        txtMin10->setAlignment(Qt::AlignmentFlag::AlignCenter);
+
+        gridLayout_calibracion->addWidget(txtMin10, 3, 1, 1, 1);
+
+        txtMax10 = new QLineEdit(gCalibracion);
+        txtMax10->setObjectName("txtMax10");
+        txtMax10->setAlignment(Qt::AlignmentFlag::AlignCenter);
+
+        gridLayout_calibracion->addWidget(txtMax10, 3, 2, 1, 1);
+
+
+        verticalLayout_tab3->addWidget(gCalibracion);
+
+        btnEnviarCalibracion = new QPushButton(tabAvanzado);
+        btnEnviarCalibracion->setObjectName("btnEnviarCalibracion");
+        btnEnviarCalibracion->setStyleSheet(QString::fromUtf8("background-color: #5bc0de; color: #1e1e1e; padding: 10px; font-size: 14px;"));
+
+        verticalLayout_tab3->addWidget(btnEnviarCalibracion);
+
+        gTiemposActuador = new QGroupBox(tabAvanzado);
+        gTiemposActuador->setObjectName("gTiemposActuador");
+        gridLayout_tiempos = new QGridLayout(gTiemposActuador);
+        gridLayout_tiempos->setObjectName("gridLayout_tiempos");
+        lblExtend = new QLabel(gTiemposActuador);
+        lblExtend->setObjectName("lblExtend");
+
+        gridLayout_tiempos->addWidget(lblExtend, 0, 0, 1, 1);
+
+        txtExtendMs = new QLineEdit(gTiemposActuador);
+        txtExtendMs->setObjectName("txtExtendMs");
+        txtExtendMs->setAlignment(Qt::AlignmentFlag::AlignCenter);
+
+        gridLayout_tiempos->addWidget(txtExtendMs, 0, 1, 1, 1);
+
+        lblDelay = new QLabel(gTiemposActuador);
+        lblDelay->setObjectName("lblDelay");
+
+        gridLayout_tiempos->addWidget(lblDelay, 1, 0, 1, 1);
+
+        txtDelayMs = new QLineEdit(gTiemposActuador);
+        txtDelayMs->setObjectName("txtDelayMs");
+        txtDelayMs->setAlignment(Qt::AlignmentFlag::AlignCenter);
+
+        gridLayout_tiempos->addWidget(txtDelayMs, 1, 1, 1, 1);
+
+
+        verticalLayout_tab3->addWidget(gTiemposActuador);
+
+        btnEnviarTiempos = new QPushButton(tabAvanzado);
+        btnEnviarTiempos->setObjectName("btnEnviarTiempos");
+        btnEnviarTiempos->setStyleSheet(QString::fromUtf8("background-color: #5bc0de; color: #1e1e1e; padding: 10px; font-size: 14px;"));
+
+        verticalLayout_tab3->addWidget(btnEnviarTiempos);
+
+        verticalSpacer_tab3 = new QSpacerItem(20, 40, QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Expanding);
+
+        verticalLayout_tab3->addItem(verticalSpacer_tab3);
 
         tabWidget->addTab(tabAvanzado, QString());
 
@@ -559,7 +690,7 @@ public:
 
         retranslateUi(MainWindow);
 
-        tabWidget->setCurrentIndex(0);
+        tabWidget->setCurrentIndex(2);
 
 
         QMetaObject::connectSlotsByName(MainWindow);
@@ -621,8 +752,26 @@ public:
         lblTiempoS1->setText(QCoreApplication::translate("MainWindow", "Tiempo Servo1: -- ms", nullptr));
         lblTiempoS2->setText(QCoreApplication::translate("MainWindow", "Tiempo Servo2: -- ms", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tabSimulacion), QCoreApplication::translate("MainWindow", "Inyecci\303\263n Manual", nullptr));
-        lblProximamente->setText(QCoreApplication::translate("MainWindow", "Espacio para futuras configuraciones...", nullptr));
-        tabWidget->setTabText(tabWidget->indexOf(tabAvanzado), QCoreApplication::translate("MainWindow", "Avanzado", nullptr));
+        gCalibracion->setTitle(QCoreApplication::translate("MainWindow", "Calibraci\303\263n de Tolerancias del Sensor Ultras\303\263nico", nullptr));
+        lblMin->setText(QCoreApplication::translate("MainWindow", "M\303\255nimo (cm)", nullptr));
+        lblMax->setText(QCoreApplication::translate("MainWindow", "M\303\241ximo (cm)", nullptr));
+        lblCaja6->setText(QCoreApplication::translate("MainWindow", "Caja Peque\303\261a (6cm):", nullptr));
+        txtMin6->setText(QCoreApplication::translate("MainWindow", "9", nullptr));
+        txtMax6->setText(QCoreApplication::translate("MainWindow", "11", nullptr));
+        lblCaja8->setText(QCoreApplication::translate("MainWindow", "Caja Mediana (8cm):", nullptr));
+        txtMin8->setText(QCoreApplication::translate("MainWindow", "6", nullptr));
+        txtMax8->setText(QCoreApplication::translate("MainWindow", "8", nullptr));
+        lblCaja10->setText(QCoreApplication::translate("MainWindow", "Caja Grande (10cm):", nullptr));
+        txtMin10->setText(QCoreApplication::translate("MainWindow", "4", nullptr));
+        txtMax10->setText(QCoreApplication::translate("MainWindow", "6", nullptr));
+        btnEnviarCalibracion->setText(QCoreApplication::translate("MainWindow", "Enviar Calibraci\303\263n (CMD 0x60)", nullptr));
+        gTiemposActuador->setTitle(QCoreApplication::translate("MainWindow", "Calibraci\303\263n de Tiempos del Actuador (Servos)", nullptr));
+        lblExtend->setText(QCoreApplication::translate("MainWindow", "Tiempo Extensi\303\263n / ACT_EXTEND (ms):", nullptr));
+        txtExtendMs->setText(QCoreApplication::translate("MainWindow", "300", nullptr));
+        lblDelay->setText(QCoreApplication::translate("MainWindow", "Tiempo Retracci\303\263n / ACT_DELAY (ms):", nullptr));
+        txtDelayMs->setText(QCoreApplication::translate("MainWindow", "100", nullptr));
+        btnEnviarTiempos->setText(QCoreApplication::translate("MainWindow", "Enviar Tiempos (CMD 0x62)", nullptr));
+        tabWidget->setTabText(tabWidget->indexOf(tabAvanzado), QCoreApplication::translate("MainWindow", "Calibraci\303\263n", nullptr));
     } // retranslateUi
 
 };
